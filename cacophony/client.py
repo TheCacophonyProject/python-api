@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Python client for Cacophony Project Server."""
+
 VERSION = {"SERVER":"4.10.0","CLIENT":"4.10.0.alpha"}
 from .apibase import APIBase
 
@@ -7,7 +10,7 @@ from requests_toolbelt import MultipartEncoder
 from urllib.parse import urljoin
 
 
-class API(APIBase):
+class CacophonyClient(APIBase):
     def __init__(self, baseurl, username, password):
         super().__init__(baseurl, username, password, "user")
     
