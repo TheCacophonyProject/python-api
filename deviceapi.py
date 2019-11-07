@@ -1,4 +1,4 @@
-from apibase import APIBase
+from .apibase import APIBase
 
 import json
 import requests

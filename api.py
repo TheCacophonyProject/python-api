@@ -1,4 +1,5 @@
-from apibase import APIBase
+VERSION = {"SERVER":"4.10.0","CLIENT":"4.10.0.alpha"}
+from .apibase import APIBase
 
 import json
 import requests
@@ -9,6 +10,9 @@ from urllib.parse import urljoin
 class API(APIBase):
     def __init__(self, baseurl, username, password):
         super().__init__(baseurl, username, password, "user")
+    
+    def version(self):
+        return VERSION
 
     def get(self, recording_id):
         url = urljoin(self._baseurl, "/api/v1/recordings/" + str(recording_id))
@@ -21,7 +25,18 @@ class API(APIBase):
         )
         r = requests.get(url, headers=self._auth_header)
         return check_response(r)
+ 
+    def get_groups_as_json(self):
+        return self._get_all("/api/v1/groups")
 
+    def get_devices_as_json(self):
+        return self._get_all("/api/v1/devices")["devices"]["rows"]
+
+    def _get_all(self, url):
+        r = requests.get(urljoin(self._baseurl, url), params={"where": "{}"},
+                                                    headers=self._auth_header)
+        return check_response(r)
+        
     def reprocess(self, recordings: []):
         url = urljoin(self._baseurl, "/api/v1/reprocess")
         r = requests.post(
