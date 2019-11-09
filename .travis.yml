@@ -1,0 +1,62 @@
+
+
+sudo: required
+
+services:
+  - docker
+
+language: python
+
+python:
+  - "3.6"
+  - "3.7"
+
+addons:
+  apt:
+    packages:
+    - wget
+
+matrix:
+  include:
+    - python: 3.7
+      env: TOX_ENV=pep257
+    - python: 3.7
+      env: TOX_ENV=docs
+    - python: 3.7
+      env: TOX_ENV=flake8
+    - python: 3.7
+      env: TOX_ENV=coverage
+    - python: 3.7
+      env: TOX_ENV=mypy
+
+env:
+  - CACOPHONY_VER=v4.10.0  # 2019-05-08 https://github.com/TheCacophonyProject/cacophony-api/releases/tag/v4.10.0   0c7e3bf14a9464e36dc8146a72d7e13a5441f34f
+
+install:
+  - pip install tox-travis
+  - pip install setuptools
+  - pip install coveralls
+  - git clone --branch "${CACOPHONY_VER}"  "https://github.com/TheCacophonyProject/cacophony-api"
+  - cd cacophony-api
+  - ./run --isolate --background
+  - cd ..
+  - docker cp test-files/db-test-seed.sql cacophony-api:/db-seed.sql
+before_script:
+  - ./cacophony-api/wait-for-api || { docker ps; docker logs cacophony-api; exit 1; }
+  - sudo docker exec cacophony-api sh -c "sudo -i -u postgres psql cacophonytest -f/db-seed.sql"
+script:
+  - if [ -n "${TOX_ENV}" ]; then tox -e "${TOX_ENV}"; else tox; fi
+  - go vet ./... && go test ./...
+
+after_success:
+    - if [ "${TOX_ENV}" == "coverage" ] ; then coveralls; fi
+
+notifications:
+    email: false
+
+# Travis caching
+cache: false
+#  directories:
+#    - $HOME/.cache/pip
+#before_cache:
+#  - rm -f $HOME/.cache/pip/log/debug.log
