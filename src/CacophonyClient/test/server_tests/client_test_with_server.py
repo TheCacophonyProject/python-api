@@ -36,8 +36,8 @@ defaults = {
     "defaultPassword"     : "test-password",
     "defaultGroup"        : "test-group",
     "defaultGroup2"       : "test-group-2",
-    "defaultUsername"     : "python-client-user-test",
-    "defaultuserPassword" : "test-user_TEST!@#$%-password",
+    "defaultUsername"     : "go-api-user-test",
+    "defaultuserPassword" : "test-user-password",
     "filesURL"            : "/files",
     "hostsFileString"     : "`127.0.0.1 raspberrypi::1 localhost"
 }
