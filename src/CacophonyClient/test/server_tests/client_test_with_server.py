@@ -36,11 +36,12 @@ defaults = {
     "defaultPassword"     : "test-password",
     "defaultGroup"        : "test-group",
     "defaultGroup2"       : "test-group-2",
-    "defaultUsername"     : "go-api-user-test",
+    "defaultUsername"     : "cacophony-client-user-test",
     "defaultuserPassword" : "test-user-password",
     "filesURL"            : "/files",
     "hostsFileString"     : "`127.0.0.1 raspberrypi::1 localhost"
 }
+#TODO: test a more complex password 
 
 def _build_response_object(status_code=200, content=""):
     resp = requests.Response()
