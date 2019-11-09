@@ -1,2 +1,2 @@
-requests
-requests-toolbelt
+requests>=2.17.0
+requests-toolbelt>=0.9.1

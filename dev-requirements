@@ -1,0 +1,9 @@
+requests>=2.17.0
+requests-toolbelt>=0.9.1
+nose
+mock
+pandas==0.20.1
+Sphinx==1.5.5
+sphinx_rtd_theme
+wheel
+twine

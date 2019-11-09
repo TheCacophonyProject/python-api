@@ -1,6 +1,6 @@
 # Cacophony SERVER REST api  python_client V1
+Python client for the REST [Cacophony API server](https://github.com/TheCacophonyProject/cacophony-api).
 
-This client for the Cacophony Project Server provides a python set of classes to interect with the REST api
 
 
 ## Installation
@@ -12,8 +12,28 @@ This API client requires Python 3.6 or later.
 * python setup.py install
 
 ## Configuration
+>### Client Instance setup
+>Open an instance of the client and use credentials directly
+>``` python
+>from cacophonyREST_python_clientV1.cacophonyClient.client import CacophonyClient
+>cp_client = CacophonyClient(baseurl=<SERVER-URL>, 
+>                            username=<USER-NAME>, 
+>                            password=<USER-PASSWORD>)
+>```
+>or alternatively with credential stored  in `defaultconfig.json`
+>```python
+>from cacophonyREST_python_clientV1.cacophonyClient.client import CacophonyClient
+>from cacophonyREST_python_clientV1.cacophonyClient.config import Config
+>
+>config=Config().load_config(config_file=os.path.join(
+>    os.getcwd(),'defaultconfig.json'))
+>
+>cp_client = CacophonyClient(config.api_url,
+>                            username=config.admin_username ,
+>                            password=config.admin_password)
+>```
+>
 
-Modify the  defaultconfig.json with correct user credential 
 
 ## API calls
 
