@@ -11,7 +11,7 @@ This API client requires Python 3.6 or later.
 * Install dependencies: `pip install -r requirements.txt`
 * python setup.py install
 
-## Configuration
+## Configuration from a user perspecitve
 >### Client Instance setup
 >Open an instance of the client and use credentials directly
 >``` python
@@ -41,3 +41,20 @@ By default the most recent 100 recordings accessible to the user
 account are queried but `API.query()` does support a number of
 filtering options. The API server supports arbitrary queries so feel
 free to extend `API.query()` if required.
+
+
+## Configuration from a device perspecitve
+# TODO: check device and create tests
+
+
+
+
+
+## Testing
+
+#TODO: expand testing in both `client_test.py` and `client_test_with_server.py`
+
+`nosetests src/CacophonyClient/test/client_test.py`  tests without requiring  a server . For testing against a server as is part of the travis test `nosetests src/CacophonyClient/test/client_test_with_server.py`. This does require a local server setup see [travis.yml](travis.yml)
+
+
+
