@@ -166,24 +166,117 @@ class mockedCacophonyServer(unittest.TestCase):
         mock_json_result = "some sort of error message"
         #Check What Exception we get
         result=None
-        #TODO: change this the valid exception
-        with self.assertRaises(Exception) as context:
+        #TODO: What about exceptions 301, 100 etc
+        
+        for status_code in [400,422,500,501]:
+            with self.assertRaises(Exception) as context:
 
-            # Setup expected request
-            with requests_mock.Mocker() as m:
-                m.register_uri(
-                    requests_mock.GET,
-                    "{apiURL}/api/v1/recordings/{recording_id}".format(apiURL=defaults["apiURL"],
-                                                                recording_id=str(int_recording_id)),
-                    json={"message":mock_json_result}, status_code=400
-                )
-                # TEST 
-                result = self.cli.get(int_recording_id)
-            
-        self.assertTrue(type(context.exception)==OSError)
-        self.assertTrue('request failed (400): '+mock_json_result in str(context.exception))
-        #TODO: check what exception was raised
-        # print("This exception raised:{}".format(context.exception))
+                # Setup expected request
+                with requests_mock.Mocker() as m:
+                    m.register_uri(
+                        requests_mock.GET,
+                        "{apiURL}/api/v1/recordings/{recording_id}".format(apiURL=defaults["apiURL"],
+                                                                    recording_id=str(int_recording_id)),
+                        json={"message":mock_json_result}, status_code=status_code
+                    )
+                    # TEST 
+                    result = self.cli.get(int_recording_id)
+                
+
+            if status_code in  [400,422]:
+                self.assertTrue(type(context.exception)==OSError)
+                self.assertTrue('request failed ({status_code}): {message}'.format(status_code=status_code, message=mock_json_result) in str(context.exception))
+            elif status_code in [500,501]:
+                #TODO: look at improved assertions
+                print( str(context.exception))
+                self.assertTrue(type(context.exception)==requests.exceptions.HTTPError)
+                self.assertTrue('{status_code} Server Error: None'.format(status_code=status_code) in str(context.exception))
+            else:
+                self.assertFalse(True)
+
+            #TODO: check what exception was raised
+            # print("This exception raised:{}".format(context.exception))
+
+    def test_valid_get_tracks(self):
+        """Test CacophonyClient.get_tracks with a valid recording_id from mocked CacophonyServer object."""
+        #TODO: handle error as correct result
+        int_recording_id = 432109
+        str_recording_id = '432109'
+        mock_json_result = {'key1': 'value1', 'key2': 'value2'}
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.GET,
+                "{apiURL}/api/v1/recordings/{recording_id}/tracks".format(apiURL=defaults["apiURL"],
+                                                            recording_id=str(int_recording_id)),
+                json=mock_json_result, status_code=200
+            )
+            result = self.cli.get_tracks(int_recording_id)
+
+            # print(m.last_request.qs)
+            self.assertEqual(result, mock_json_result)
+            self.assertEqual(m.last_request.qs, {})
+            self.assertEqual(m.last_request.path, 
+                            '/api/v1/recordings/{str_recording_id}/tracks'.format(
+                                str_recording_id=str_recording_id))
+
+    def test_valid_get_groups(self):
+        """Test CacophonyClient.get_groups (no parameters passed) from mocked CacophonyServer object."""
+        #TODO: handle error as correct result
+        mock_json_result = {'key1': 'value1', 'key2': 'value2'}
+        mock_qs = {"where": ["{}"]}
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.GET,
+                "{apiURL}/api/v1/groups".format(apiURL=defaults["apiURL"]),
+                json=mock_json_result, status_code=200
+            )
+            result = self.cli.get_groups_as_json()
+
+            # print(m.last_request.qs)
+            self.assertEqual(result, mock_json_result)
+            self.assertEqual(m.last_request.qs, mock_qs)
+            self.assertEqual(m.last_request.path, 
+                            '/api/v1/groups')
+
+    def test_valid_get_devices(self):
+        """Test CacophonyClient.get_devices (no parameters passed) from mocked CacophonyServer object."""
+
+        mock_apiPath= '/api/v1/devices'
+        mock_json_result = {"devices":{"rows":{'key1': 'value1', 'key2': 'value2'}}}
+        mock_qs = {"where": ["{}"]}
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.GET,
+                "{apiURL}{apiPath}".format(apiURL=defaults["apiURL"], apiPath=mock_apiPath),
+                json=mock_json_result, status_code=200
+            )
+            result = self.cli.get_devices_as_json()
+
+            # print(m.last_request.qs)
+            self.assertEqual(result, mock_json_result["devices"]["rows"])
+            self.assertEqual(m.last_request.qs, mock_qs)
+            self.assertEqual(m.last_request.path, mock_apiPath)
+
+    def test_valid_reprocess(self):
+        """Test CacophonyClient.get_devices (no parameters passed) from mocked CacophonyServer object."""
+        #TODO: Construct the data to pass in the post
+        mock_apiPath= '/api/v1/reprocess'
+        mock_recordings = [1,2,3]
+        mock_postData = {"recordings": mock_recordings}
+        mock_json_result = {"devices":{"rows":{'key1': 'value1', 'key2': 'value2'}}}
+        mock_qs = {}
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.POST,
+                "{apiURL}{apiPath}".format(apiURL=defaults["apiURL"], apiPath=mock_apiPath),
+                json=mock_postData, status_code=200
+            )
+            result = self.cli.reprocess(mock_recordings)
+
+            # print(m.last_request.qs)
+            self.assertEqual(result, mock_postData)
+            self.assertEqual(m.last_request.qs, mock_qs)
+            self.assertEqual(m.last_request.path, mock_apiPath)
 
 class FakeClient(CacophonyClient):
     """Set up a fake client instance of CacophonyClient."""
