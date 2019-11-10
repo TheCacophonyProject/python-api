@@ -10,7 +10,7 @@ from requests_toolbelt import MultipartEncoder
 from urllib.parse import urljoin
 
 
-class CacophonyClient(APIBase):
+class UserAPI(APIBase):
     def __init__(self, baseurl, username, password):
         super().__init__(baseurl, username, password, "user")
     

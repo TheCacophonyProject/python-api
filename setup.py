@@ -18,7 +18,7 @@ import re
 
 
 with open(os.path.join(os.path.dirname(__file__), 
-        'src','cacophonyClient', '__init__.py')) as f:
+        'src','thecacophonyproject', 'serverclient','__init__.py')) as f:
     version = re.search("__version__ = '([^']+)'", f.read()).group(1)
 
 with open('requirements.txt', 'r') as f:
@@ -36,7 +36,7 @@ setup(
     version=version,
     description="Cacophony Project REST API client",
     long_description=readme,
-    url='https://github.com/TheCacophonyProject/cacophony-python-client',
+    url='https://github.com/TheCacophonyProject/serverclient_python',
     license='GNU AFFERO GENERAL PUBLIC License 3 19 November 2007',
     packages=find_packages(exclude=['tests']),
     test_suite='nose2.collector.collector',
@@ -48,12 +48,12 @@ setup(
     # metadata to display on PyPI
     author="Anthony Uphof, Giampaolo Ferraro, Cameron Ryan-Pears, Menno Finlay-Smits",
     author_email="dev@cacphonyproject.org.nz",
-    keywords="cacophony api client rest",
+    keywords="cacophonyproject api client rest",
 
     project_urls={
-        "Bug Tracker": 'https://github.com/TheCacophonyProject/cacophony-python-client/issues',
-        "Documentation": 'https://github.com/TheCacophonyProject/cacophony-python-client/wiki',
-        "Source Code": 'https://github.com/TheCacophonyProject/cacophony-python-client',
+        "Bug Tracker": 'https://github.com/TheCacophonyProject/serverclient_python/issues',
+        "Documentation": 'https://github.com/TheCacophonyProject/serverclient_python/wiki',
+        "Source Code": 'https://github.com/TheCacophonyProject/serverclient_python',
     },
 
     classifiers=[
