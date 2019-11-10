@@ -1,6 +1,8 @@
 requests>=2.17.0
 requests-toolbelt>=0.9.1
-nose
+coverage>=4.5.4
+nose2
+nose2[coverage-plugin]>=0.6.5
 mock
 pandas==0.20.1
 Sphinx==1.5.5

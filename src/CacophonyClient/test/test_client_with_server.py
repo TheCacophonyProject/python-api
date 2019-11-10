@@ -26,12 +26,11 @@ import requests
 import requests.exceptions
 import requests_mock
 
-from nose.tools import raises
 
 from CacophonyClient.client import CacophonyClient
 
 defaults = {
-    "apiURL"              : "http://localhost:1080",
+    "apiURL"              : "http://10.1.1.171:1080",
     "defaultDevice"       : "test-device",
     "defaultPassword"     : "test-password",
     "defaultGroup"        : "test-group",
@@ -101,7 +100,8 @@ class TestCacophonyClient(unittest.TestCase):
                            password=defaults["defaultuserPassword"])
         self.assertEqual(defaults['apiURL'], cli._baseurl)
 
-
+if __name__ == '__main__':
+    unittest.main()
 
 """
 	goconfig "github.com/TheCacophonyProject/go-config"

@@ -54,7 +54,14 @@ free to extend `API.query()` if required.
 
 #TODO: expand testing in both `client_test.py` and `client_test_with_server.py`
 
-`nosetests src/CacophonyClient/test/client_test.py`  tests without requiring  a server . For testing against a server as is part of the travis test `nosetests src/CacophonyClient/test/client_test_with_server.py`. This does require a local server setup see [travis.yml](travis.yml)
+Testing uses the pythony unittest framework where by both unit and integration testing is done.
+
+`test\test_client.py` is tests without requiring a server `nose2 --verbosity 2  CacophonyClient.test.test_client`
+
+and `test\test_client_with_server` is full integration testing against a server. This is also part of the travis test `nose2 --verbosity 2 CacophonyClient.test.test_with_server`. 
+This integration testing does require a local server setup see [travis.yml](travis.yml)
+
+For individual test `nose2 --verbosity 2  CacophonyClient.test.test_client.mockedCacophonyServer.test_query`
 
 
 
