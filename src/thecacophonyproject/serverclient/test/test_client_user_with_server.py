@@ -2,7 +2,7 @@
 
 """Unit tests for the Python client of the  Cacophony Project REST API server.
 NB/WARNING:
-This module implements tests for the CacophonyClient class
+This module implements tests for the UserAPI class
 but does so
  + WITH a server instance running
  + by mocking all the expected responses.
@@ -27,7 +27,7 @@ import requests.exceptions
 import requests_mock
 
 
-from CacophonyClient.client import CacophonyClient
+from thecacophonyproject.serverclient.user import UserAPI
 
 defaults = {
     "apiURL"              : "http://10.1.1.171:1080",
@@ -88,14 +88,14 @@ class TestCacophonyClient(unittest.TestCase):
         # By default, raise exceptions on warnings
         warnings.simplefilter('error', FutureWarning)
 
-        self.cli = CacophonyClient(baseurl=defaults["apiURL"], 
+        self.cli = UserAPI(baseurl=defaults["apiURL"], 
                            username=defaults["defaultUsername"], 
                            password=defaults["defaultuserPassword"])
 
 
     def test_scheme(self):
         """Set up the test schema for TestCacophonyClient object."""
-        cli = CacophonyClient(baseurl=defaults["apiURL"], 
+        cli = UserAPI(baseurl=defaults["apiURL"], 
                            username=defaults["defaultUsername"], 
                            password=defaults["defaultuserPassword"])
         self.assertEqual(defaults['apiURL'], cli._baseurl)

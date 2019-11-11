@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Unit tests for the Python client of the  Cacophony Project REST API server.
 NB/WARNING:
-This module implements tests for the CacophonyClient class
+This module implements tests for the UserAPI class
 but does so
  + without any server instance running
  + by mocking all the expected responses.
@@ -18,6 +18,7 @@ import random
 import socket
 import unittest
 import warnings
+import types
 
 import json
 import mock
@@ -26,8 +27,9 @@ import requests.exceptions
 import requests_mock
 
 from datetime import datetime
+import random
 
-from CacophonyClient.client import CacophonyClient
+from thecacophonyproject.serverclient.user import UserAPI
 
 defaults = {
     "apiURL"              : "http://localhost:1080",
@@ -93,7 +95,7 @@ class mockedCacophonyServer(unittest.TestCase):
                 "{apiURL}/authenticate_user".format(apiURL=defaults["apiURL"]),
                 status_code=204
             )
-            self.cli = CacophonyClient(baseurl=defaults["apiURL"], 
+            self.cli = UserAPI(baseurl=defaults["apiURL"], 
                             username=defaults["defaultUsername"], 
                             password=defaults["defaultuserPassword"])
             # print("SETUP: last request.body:{}".format(m.last_request.body))
@@ -107,7 +109,7 @@ class mockedCacophonyServer(unittest.TestCase):
                 "{apiURL}/authenticate_user".format(apiURL=defaults["apiURL"]),
                 status_code=204
             )
-            cli = CacophonyClient(baseurl=defaults["apiURL"], 
+            cli = UserAPI(baseurl=defaults["apiURL"], 
                             username=defaults["defaultUsername"], 
                             password=defaults["defaultuserPassword"])
             # print(m.last_request.body)
@@ -116,14 +118,14 @@ class mockedCacophonyServer(unittest.TestCase):
 
 
     def test_query(self):
-        """Test CacophonyClient.query from mocked CacophonyServer object."""
+        """Test UserAPI.query from mocked CacophonyServer object."""
         with requests_mock.Mocker() as m:
             m.register_uri(
                 requests_mock.GET,
                 "{apiURL}/api/v1/recordings".format(apiURL=defaults["apiURL"]),
                 json={"rows":{'key1': 'value1', 'key2': 'value2'}}, status_code=200
             )
-            result = self.cli.query(
+            _ = self.cli.query(
                     endDate=_strToSqlDateTime("2019-11-06 06:30:00"),
                     startDate=_strToSqlDateTime("2019-11-01 19:00:00"),
                     limit=300,
@@ -138,7 +140,7 @@ class mockedCacophonyServer(unittest.TestCase):
             )
 
     def test_get_valid_recordingId(self):
-        """Test CacophonyClient.get with a valid recording_id from mocked CacophonyServer object."""
+        """Test UserAPI.get with a valid recording_id from mocked CacophonyServer object."""
         #TODO: handle error as correct result
         int_recording_id = 432109
         str_recording_id = '432109'
@@ -147,7 +149,7 @@ class mockedCacophonyServer(unittest.TestCase):
             m.register_uri(
                 requests_mock.GET,
                 "{apiURL}/api/v1/recordings/{recording_id}".format(apiURL=defaults["apiURL"],
-                                                            recording_id=str(int_recording_id)),
+                                                            recording_id="{}".format(int_recording_id)),
                 json={"recording":mock_json_result}, status_code=200
             )
             result = self.cli.get(int_recording_id)
@@ -160,27 +162,25 @@ class mockedCacophonyServer(unittest.TestCase):
                                 str_recording_id=str_recording_id))
 
     def test_get_invalid_recordingId(self):
-        """Test CacophonyClient.get with an invalid recording_id from mocked CacophonyServer object."""
+        """Test UserAPI.get with an invalid recording_id from mocked CacophonyServer object."""
         int_recording_id = ''
         str_recording_id = ''
         mock_json_result = "some sort of error message"
-        #Check What Exception we get
-        result=None
+        # result=None
         #TODO: What about exceptions 301, 100 etc
         
         for status_code in [400,422,500,501]:
             with self.assertRaises(Exception) as context:
-
                 # Setup expected request
                 with requests_mock.Mocker() as m:
                     m.register_uri(
                         requests_mock.GET,
                         "{apiURL}/api/v1/recordings/{recording_id}".format(apiURL=defaults["apiURL"],
-                                                                    recording_id=str(int_recording_id)),
+                                                                    recording_id= "{}".format(int_recording_id)),
                         json={"message":mock_json_result}, status_code=status_code
                     )
                     # TEST 
-                    result = self.cli.get(int_recording_id)
+                    _ = self.cli.get(int_recording_id)
                 
 
             if status_code in  [400,422]:
@@ -188,9 +188,9 @@ class mockedCacophonyServer(unittest.TestCase):
                 self.assertTrue('request failed ({status_code}): {message}'.format(status_code=status_code, message=mock_json_result) in str(context.exception))
             elif status_code in [500,501]:
                 #TODO: look at improved assertions
-                print( str(context.exception))
+                # print("{}".format(context.exception))
                 self.assertTrue(type(context.exception)==requests.exceptions.HTTPError)
-                self.assertTrue('{status_code} Server Error: None'.format(status_code=status_code) in str(context.exception))
+                self.assertTrue('{status_code} Server Error: None'.format(status_code=status_code) in "{}".format(context.exception))
             else:
                 self.assertFalse(True)
 
@@ -198,7 +198,7 @@ class mockedCacophonyServer(unittest.TestCase):
             # print("This exception raised:{}".format(context.exception))
 
     def test_valid_get_tracks(self):
-        """Test CacophonyClient.get_tracks with a valid recording_id from mocked CacophonyServer object."""
+        """Test UserAPI.get_tracks with a valid recording_id from mocked CacophonyServer object."""
         #TODO: handle error as correct result
         int_recording_id = 432109
         str_recording_id = '432109'
@@ -207,7 +207,7 @@ class mockedCacophonyServer(unittest.TestCase):
             m.register_uri(
                 requests_mock.GET,
                 "{apiURL}/api/v1/recordings/{recording_id}/tracks".format(apiURL=defaults["apiURL"],
-                                                            recording_id=str(int_recording_id)),
+                                                            recording_id="{}".format(int_recording_id)),
                 json=mock_json_result, status_code=200
             )
             result = self.cli.get_tracks(int_recording_id)
@@ -220,7 +220,7 @@ class mockedCacophonyServer(unittest.TestCase):
                                 str_recording_id=str_recording_id))
 
     def test_valid_get_groups(self):
-        """Test CacophonyClient.get_groups (no parameters passed) from mocked CacophonyServer object."""
+        """Test UserAPI.get_groups (no parameters passed) from mocked CacophonyServer object."""
         #TODO: handle error as correct result
         mock_json_result = {'key1': 'value1', 'key2': 'value2'}
         mock_qs = {"where": ["{}"]}
@@ -239,7 +239,7 @@ class mockedCacophonyServer(unittest.TestCase):
                             '/api/v1/groups')
 
     def test_valid_get_devices(self):
-        """Test CacophonyClient.get_devices (no parameters passed) from mocked CacophonyServer object."""
+        """Test UserAPI.get_devices (no parameters passed) from mocked CacophonyServer object."""
 
         mock_apiPath= '/api/v1/devices'
         mock_json_result = {"devices":{"rows":{'key1': 'value1', 'key2': 'value2'}}}
@@ -258,12 +258,12 @@ class mockedCacophonyServer(unittest.TestCase):
             self.assertEqual(m.last_request.path, mock_apiPath)
 
     def test_valid_reprocess(self):
-        """Test CacophonyClient.get_devices (no parameters passed) from mocked CacophonyServer object."""
+        """Test UserAPI.get_devices (no parameters passed) from mocked CacophonyServer object."""
         #TODO: Construct the data to pass in the post
         mock_apiPath= '/api/v1/reprocess'
         mock_recordings = [1,2,3]
         mock_postData = {"recordings": mock_recordings}
-        mock_json_result = {"devices":{"rows":{'key1': 'value1', 'key2': 'value2'}}}
+        # mock_json_result = {"devices":{"rows":{'key1': 'value1', 'key2': 'value2'}}}
         mock_qs = {}
         with requests_mock.Mocker() as m:
             m.register_uri(
@@ -278,8 +278,116 @@ class mockedCacophonyServer(unittest.TestCase):
             self.assertEqual(m.last_request.qs, mock_qs)
             self.assertEqual(m.last_request.path, mock_apiPath)
 
-class FakeClient(CacophonyClient):
-    """Set up a fake client instance of CacophonyClient."""
+    def test_valid_download(self):
+        """Test UserAPI.download with a valid recording_id from mocked CacophonyServer object."""
+        
+        int_recording_id = 432109
+        str_recording_id = '432109'
+
+        mock_apiPathTokenRequest= "/api/v1/recordings/{recording_id}".format(
+                                            recording_id="{}".format(int_recording_id))
+        mock_apiPathTokenProcess= '/api/v1/signedUrl'
+ 
+        mock_json_result = {'key1': 'value1', 'key2': 'value2'}
+
+        token = "asfasdfdasfdasfadsf"
+
+        # First Test getting the download token
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.GET,
+                "{apiURL}{apiPath}".format(
+                            apiURL=defaults["apiURL"],
+                            apiPath=mock_apiPathTokenRequest),
+                json={"downloadFileJWT":token}, status_code=200
+            )
+            recordingStreamGenerator = self.cli.download(int_recording_id)
+
+             
+            self.assertEqual(type(recordingStreamGenerator), types.GeneratorType)
+            self.assertEqual(m.last_request.qs, {})
+            self.assertEqual(m.last_request.path, 
+                            '/api/v1/recordings/{str_recording_id}'.format(
+                                str_recording_id=str_recording_id))
+
+        #Now test the stream retrieval
+        # TODO: Is it necessary to consider smaller or bigger stream byte retures
+        expectedReturn1 = bytes([random.randint(1,254) for _ in range(4096)])
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.GET,
+                "{apiURL}{apiPath}".format(
+                            apiURL=defaults["apiURL"],
+                            apiPath=mock_apiPathTokenProcess),
+                # params={"jwt":token},
+                content= expectedReturn1, status_code=200 
+            )
+            buffer = next(recordingStreamGenerator) 
+        self.assertEqual(buffer,expectedReturn1)
+
+
+    def test_valid__all_downloads(self):
+        """Test UserAPI.download and Test UserAPI.download with a valid recording_id from mocked CacophonyServer object."""
+
+        downloadtype={  "typeOfJWT":"downloadFileJWT", 
+                        "UserAPIcall": self.cli.download}
+
+        self._generic_download_test(downloadtype=downloadtype)
+
+        downloadtype={  "typeOfJWT":"downloadRawJWT", 
+                        "UserAPIcall": self.cli.download_raw}
+
+        self._generic_download_test(downloadtype=downloadtype)
+
+
+    def _generic_download_test(self,downloadtype):
+                
+            int_recording_id = 432109
+            str_recording_id = '432109'
+
+            mock_apiPathTokenRequest= "/api/v1/recordings/{recording_id}".format(
+                                                recording_id="{}".format(int_recording_id))
+            mock_apiPathTokenProcess= '/api/v1/signedUrl'
+    
+            mock_json_result = {'key1': 'value1', 'key2': 'value2'}
+
+            token = "asfasdfdasfdasfadsf"
+            # First Test getting the download token
+            with requests_mock.Mocker() as m:
+                m.register_uri(
+                    requests_mock.GET,
+                    "{apiURL}{apiPath}".format(
+                                apiURL=defaults["apiURL"],
+                                apiPath=mock_apiPathTokenRequest),
+                    json={downloadtype["typeOfJWT"]:token}, status_code=200
+                )
+                recordingStreamGenerator = downloadtype["UserAPIcall"](int_recording_id)
+
+                
+                self.assertEqual(type(recordingStreamGenerator), types.GeneratorType)
+                self.assertEqual(m.last_request.qs, {})
+                self.assertEqual(m.last_request.path, 
+                                '/api/v1/recordings/{str_recording_id}'.format(
+                                    str_recording_id=str_recording_id))
+            
+            #Now test the stream retrieval
+            # TODO: Is it necessary to consider smaller or bigger stream byte retures
+            expectedReturn1 = bytes([random.randint(1,254) for _ in range(4096)])
+            with requests_mock.Mocker() as m:
+                m.register_uri(
+                    requests_mock.GET,
+                    "{apiURL}{apiPath}".format(
+                                apiURL=defaults["apiURL"],
+                                apiPath=mock_apiPathTokenProcess),
+                    # params={"jwt":token},
+                    content= expectedReturn1, status_code=200 
+                )
+                buffer = next(recordingStreamGenerator) 
+            self.assertEqual(buffer,expectedReturn1)
+
+
+class FakeClient(UserAPI):
+    """Set up a fake client instance of UserAPI."""
 
     def __init__(self, *args, **kwargs):
         """Initialize an instance of the FakeClient object."""
