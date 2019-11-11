@@ -18,7 +18,7 @@ import re
 
 
 with open(os.path.join(os.path.dirname(__file__), 
-        'src','thecacophonyproject', 'serverclient','__init__.py')) as f:
+        'src','cacophonyapi', '__init__.py')) as f:
     version = re.search("__version__ = '([^']+)'", f.read()).group(1)
 
 with open('requirements.txt', 'r') as f:
@@ -32,11 +32,11 @@ with open('README.md', 'r') as f:
 
 
 setup(
-    name='CacophonyClient',
+    name='cacophonyapi',
     version=version,
-    description="Cacophony Project REST API client",
+    description="Cacophony Project REST API client for python",
     long_description=readme,
-    url='https://github.com/TheCacophonyProject/serverclient_python',
+    url='https://github.com/TheCacophonyProject/python-api',
     license='GNU AFFERO GENERAL PUBLIC License 3 19 November 2007',
     packages=find_packages(exclude=['tests']),
     test_suite='nose2.collector.collector',
@@ -47,19 +47,19 @@ setup(
 
     # metadata to display on PyPI
     author="Anthony Uphof, Giampaolo Ferraro, Cameron Ryan-Pears, Menno Finlay-Smits",
-    author_email="dev@cacphonyproject.org.nz",
+    author_email="coredev@cacophony.org.nz",
     keywords="cacophonyproject api client rest",
 
     project_urls={
-        "Bug Tracker": 'https://github.com/TheCacophonyProject/serverclient_python/issues',
-        "Documentation": 'https://github.com/TheCacophonyProject/serverclient_python/wiki',
-        "Source Code": 'https://github.com/TheCacophonyProject/serverclient_python',
+        "Bug Tracker": 'https://github.com/TheCacophonyProject/python-api',
+        "Documentation": 'https://docs.cacophony.org.nz',
+        "Source Code": 'https://github.com/TheCacophonyProject/python-api',
     },
 
     classifiers=[
-        'Development Status :: 1 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU AFFERO GENERAL PUBLIC License 3 19 November 2007',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',

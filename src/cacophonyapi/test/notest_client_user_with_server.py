@@ -27,7 +27,8 @@ import requests.exceptions
 import requests_mock
 
 
-from thecacophonyproject.serverclient.user import UserAPI
+from cacophonyapi.user  import UserAPI
+
 
 defaults = {
     "apiURL"              : "http://10.1.1.171:1080",

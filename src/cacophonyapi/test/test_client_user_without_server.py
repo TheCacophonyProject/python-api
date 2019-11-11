@@ -29,7 +29,7 @@ import requests_mock
 from datetime import datetime
 import random
 
-from thecacophonyproject.serverclient.user import UserAPI
+from cacophonyapi.user  import UserAPI
 
 defaults = {
     "apiURL"              : "http://localhost:1080",
