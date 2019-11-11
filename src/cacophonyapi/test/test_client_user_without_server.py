@@ -8,6 +8,16 @@ but does so
 So any change of (response format from) the server will **NOT** be
 detected by this module.
 See client_test_with_server.py for tests against a running server instance.
+
+For vscode     "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./python-api/src/cacophonyapi/test",
+        "-p",
+        "test_*.py"
+    ],
+
+
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -257,6 +267,46 @@ class mockedCacophonyServer(unittest.TestCase):
             self.assertEqual(m.last_request.qs, mock_qs)
             self.assertEqual(m.last_request.path, mock_apiPath)
 
+    def test_valid_list_files(self):
+        """Test UserAPI.list_files (no parameters passed) from mocked CacophonyServer object."""
+
+        mock_apiPath= '/api/v1/files'
+        mock_json_result = {"rows":{'key1': 'value1', 'key2': 'value2'}}
+        mock_qs = {'where': ['{}'], 'order': ['["id"]']}
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.GET,
+                "{apiURL}{apiPath}".format(apiURL=defaults["apiURL"], apiPath=mock_apiPath),
+                json=mock_json_result, status_code=200
+            )
+            result = self.cli.list_files()
+
+            # print(m.last_request.qs)
+            self.assertEqual(result, mock_json_result["rows"])
+            self.assertEqual(m.last_request.qs, mock_qs)
+            self.assertEqual(m.last_request.path, mock_apiPath)
+
+    def test_valid_delete_files(self):
+        """Test UserAPI.delete_file (file_id passed) from mocked CacophonyServer object."""
+        mock_int_file_id=123456
+        mock_str_file_id='123456'
+        mock_apiPath= '/api/v1/files/{file_id}'.format(
+                file_id=mock_int_file_id)
+        mock_json_result = {"rows":{'key1': 'value1', 'key2': 'value2'}}
+        mock_qs = {}
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.DELETE,
+                "{apiURL}{apiPath}".format(apiURL=defaults["apiURL"], apiPath=mock_apiPath),
+                json=mock_json_result, status_code=200
+            )
+            result = self.cli.delete_file(mock_int_file_id)
+
+            # print(m.last_request.qs)
+            self.assertEqual(result, mock_json_result)
+            self.assertEqual(m.last_request.qs, mock_qs)
+            self.assertEqual(m.last_request.path, mock_apiPath)
+
     def test_valid_reprocess(self):
         """Test UserAPI.get_devices (no parameters passed) from mocked CacophonyServer object."""
         #TODO: Construct the data to pass in the post
@@ -327,29 +377,40 @@ class mockedCacophonyServer(unittest.TestCase):
 
 
     def test_valid__all_downloads(self):
-        """Test UserAPI.download and Test UserAPI.download with a valid recording_id from mocked CacophonyServer object."""
+        """Test UserAPI.download and Test UserAPI.download_raw with a valid recording_id from mocked CacophonyServer object."""
 
-        downloadtype={  "typeOfJWT":"downloadFileJWT", 
-                        "UserAPIcall": self.cli.download}
-
-        self._generic_download_test(downloadtype=downloadtype)
-
-        downloadtype={  "typeOfJWT":"downloadRawJWT", 
-                        "UserAPIcall": self.cli.download_raw}
-
-        self._generic_download_test(downloadtype=downloadtype)
-
+        for test in [{  
+                        "artifactID" : 123490, 
+                        "apipath": lambda int_recording_id:
+                                "/api/v1/recordings/{recording_id}".format(
+                                                recording_id=int_recording_id),
+                        "UserAPIcall": self.cli.download,
+                        "UserAPIcallJSONresponse":{"downloadFileJWT":"abcdTOKENdfg"}
+                        },
+                    {
+                        "artifactID" : 123490, 
+                        "apipath": lambda int_recording_id:
+                                "/api/v1/recordings/{recording_id}".format(
+                                                recording_id=int_recording_id),
+                        "UserAPIcall": self.cli.download_raw,
+                        "UserAPIcallJSONresponse":{"downloadRawJWT":"abcdTOKENdfg"}
+                        },
+                    {
+                        "artifactID" : 123490, 
+                        "apipath": lambda int_file_id:
+                                "/api/v1/files/{file_id}".format(
+                                                file_id=int_file_id),
+                        "UserAPIcall": self.cli.download_file,
+                        "UserAPIcallJSONresponse":{'file':"somedata","jwt":"abcdTOKENdfg"}
+                        },
+                    ]:
+            self._generic_download_test(downloadtype=test)
 
     def _generic_download_test(self,downloadtype):
-                
-            int_recording_id = 432109
-            str_recording_id = '432109'
+            print(downloadtype)
 
-            mock_apiPathTokenRequest= "/api/v1/recordings/{recording_id}".format(
-                                                recording_id="{}".format(int_recording_id))
+            mock_apiPathTokenRequest= downloadtype["apipath"](downloadtype["artifactID"])
             mock_apiPathTokenProcess= '/api/v1/signedUrl'
-    
-            mock_json_result = {'key1': 'value1', 'key2': 'value2'}
 
             token = "asfasdfdasfdasfadsf"
             # First Test getting the download token
@@ -358,17 +419,22 @@ class mockedCacophonyServer(unittest.TestCase):
                     requests_mock.GET,
                     "{apiURL}{apiPath}".format(
                                 apiURL=defaults["apiURL"],
-                                apiPath=mock_apiPathTokenRequest),
-                    json={downloadtype["typeOfJWT"]:token}, status_code=200
+                                apiPath=downloadtype["apipath"](downloadtype["artifactID"])),
+                    json=downloadtype["UserAPIcallJSONresponse"], status_code=200
                 )
-                recordingStreamGenerator = downloadtype["UserAPIcall"](int_recording_id)
 
+                result = downloadtype["UserAPIcall"](downloadtype["artifactID"])
+                #TODO: handle dowloadfile returns a tuple)
+                if isinstance((result),tuple):
+                    streamGenerator=result[1]
+                    self.assertIsNotNone(result[0])
+                else:
+                    streamGenerator=result
                 
-                self.assertEqual(type(recordingStreamGenerator), types.GeneratorType)
+                self.assertEqual(type(streamGenerator), types.GeneratorType)
                 self.assertEqual(m.last_request.qs, {})
                 self.assertEqual(m.last_request.path, 
-                                '/api/v1/recordings/{str_recording_id}'.format(
-                                    str_recording_id=str_recording_id))
+                                downloadtype["apipath"](downloadtype["artifactID"]))
             
             #Now test the stream retrieval
             # TODO: Is it necessary to consider smaller or bigger stream byte retures
@@ -379,10 +445,9 @@ class mockedCacophonyServer(unittest.TestCase):
                     "{apiURL}{apiPath}".format(
                                 apiURL=defaults["apiURL"],
                                 apiPath=mock_apiPathTokenProcess),
-                    # params={"jwt":token},
                     content= expectedReturn1, status_code=200 
                 )
-                buffer = next(recordingStreamGenerator) 
+                buffer = next(streamGenerator) 
             self.assertEqual(buffer,expectedReturn1)
 
 
