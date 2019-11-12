@@ -353,10 +353,26 @@ class Mocked_cacophonyapi(unittest.TestCase):
             self.assertEqual(m.last_request.path, mock_apiPath)
 
     def test_valid_upload_recording(self):
-        """Test UserAPI.upload_recordings ( parameters passed: groupname, devicename, filename, props) to mocked CacophonyServer object."""
+        """Test UserAPI.upload_recordings ( parameters passed: groupname, devicename, filename, props) to mocked CacophonyServer object.
+
+
+        # Range of expectedResult
+
+        'expectedResult':{'outcome':'success', 
+                                'validator':lambda test: test},
+        'expectedResult':{'outcome':'failurePreRequest', 
+                                'validator':lambda test: test},
+        'expectedResult':{'outcome':'failureOnRequest', 
+                                'validator':lambda test: test},
+
+        
+        
+        """
         #TODO: Construct the data to pass in the post
         mock_apiPath= lambda devicename,groupname: '/api/v1/recordings/device/{devicename}/group/{groupname}'.format(devicename=devicename, groupname=groupname)
 
+        #TODO: construct the success validatior
+        #TODO: construct the failure validtor
         testcases = [
             {'filename':"test1.cptv",
               'mock_file.side_effect':None,
@@ -364,6 +380,9 @@ class Mocked_cacophonyapi(unittest.TestCase):
               'groupname':'groupTEST1234',
               'prop':None,
               'expectedProp':{'type':'thermalRaw'},
+              'expectedResult':{'outcome':'success', 
+                                'validator':lambda test: test},
+              'mockRequestJsonResponse':{'success':True},
               'mockRequestStatusCode':200
              },
             #TODO: adjust test mock/asserts to handle IOError
@@ -381,20 +400,26 @@ class Mocked_cacophonyapi(unittest.TestCase):
               'groupname':'groupTEST1234',
               'prop':None,
               'expectedProp':{'type':'audio'},
+              'expectedResult':{'outcome':'success', 
+                                'validator':lambda test: test},
+              'mockRequestJsonResponse':{'success':True},
               'mockRequestStatusCode':200
              },
-            #TODO: what assert/mock to do for unknown file type 
-            # {'filename':"test3.xyz",
-            #   'mock_file.side_effect':None,
-            #   'devicename':'deviceTEST1234',
-            #   'groupname':'groupTEST1234',
-            #   'prop':None,
-            #   'expectedProp':None,
-            #   'mockRequestStatusCode':200
-            #  }
+            # TODO: what assert/mock to do for unknown file type 
+            {'filename':"test3.xyz",
+              'mock_file.side_effect':None,
+              'devicename':'deviceTEST1234',
+              'groupname':'groupTEST1234',
+              'prop':None,
+              'expectedProp':None,
+              'expectedResult':{'outcome':'failurePreRequest', 
+                   'validator':lambda test: test},
+              'mockRequestJsonResponse':None,
+              'mockRequestStatusCode':None
+             }
         ]
 
-        mock_qs = {}
+
         for tc in testcases:
             print(tc)
             """
@@ -431,23 +456,34 @@ class Mocked_cacophonyapi(unittest.TestCase):
                             apiURL=defaults["apiURL"], 
                             apiPath=mock_apiPath(tc['devicename'],tc['groupname'])
                             ),
-                        json= {'success':True},
-                        # data=mock_postData,
-                        # headers=mock_postHeaders,
+                        json= tc['mockRequestJsonResponse'],
                         status_code=tc['mockRequestStatusCode']
                     )
+                    if tc['expectedResult']['outcome'] == 'success':
+    # ----------------------- API call UNDERTEST ------------------
+                        result = self.cli.upload_recording(
+                                tc['groupname'],
+                                tc['devicename'],
+                                tc['filename'],
+                                tc['prop'])
+    # ----------------------------------------------------------------
+                        print(result)
+                        #TODO: FILL in the TEST assertions in place of the following
+                        self.assertEqual(result,tc['mockRequestJsonResponse'])
+                        self.assertTrue(tc['expectedResult']['validator'](True))
 
-# ----------------------- API call UNDERTEST ------------------
-                    result = self.cli.upload_recording(
-                            tc['groupname'],
-                            tc['devicename'],
-                            tc['filename'],
-                            tc['prop'])
-# ----------------------------------------------------------------
-                    print(result)                    
-
-                    self.assertEqual(m.last_request.qs, mock_qs)
-                    #TODO: FILL in the TEST assertions in place of the following
+                    elif tc['expectedResult']['outcome'] == 'failurePreRequest':
+                        with self.assertRaises(ValueError):
+    # ----------------------- API call UNDERTEST ------------------
+                            result = self.cli.upload_recording(
+                                    tc['groupname'],
+                                    tc['devicename'],
+                                    tc['filename'],
+                                    tc['prop'])
+    # ----------------------------------------------------------------
+                    else:
+                        # TODO: Check the mockrequest was called, and mockfile
+                        self.assertTrue(False, 'Something not being checked ----------------------------')
                     # mock_file.assert_called_with(tc['filename'], 'rb')
                     # self.assertEqual(m.last_request.path, mock_apiPath)
  
