@@ -31,7 +31,7 @@ from cacophonyapi.user  import UserAPI
 
 
 defaults = {
-    "apiURL"              : "http://10.1.1.171:1080",
+    "apiURL"              : "http://localhost:1080",
     "defaultDevice"       : "test-device",
     "defaultPassword"     : "test-password",
     "defaultGroup"        : "test-group",
@@ -111,19 +111,42 @@ class liveTESTcacophonyapi(unittest.TestCase):
               'groupname':'test-group',
               'prop':None,
               'expectedProp':{'type':'thermalRaw'},
-              'mockRequestStatusCode':200
+              'expectedResult':{'outcome':'failureHTTPforbidden', 
+                                'validator':lambda test: test},
+              'mockRequestStatusCode':403
              },]
         for tc in testcases:
             print(tc)
-# ----------------------- API call UNDERTEST ------------------
-            result = self.cli.upload_recording(
-                    tc['groupname'],
-                    tc['devicename'],
-                    tc['filename'],
-                    tc['prop'])
-# ----------------------------------------------------------------
-            print(result)
-            self.assertTrue(result['success'])
+            if tc['expectedResult']['outcome']=='success':
+    # ----------------------- API call UNDERTEST ------------------
+                result = self.cli.upload_recording(
+                        tc['groupname'],
+                        tc['devicename'],
+                        tc['filename'],
+                        tc['prop'])
+    # ----------------------------------------------------------------
+                print(result)
+                self.assertTrue(result['success'])
+
+            elif tc['expectedResult']['outcome']=='failureHTTPforbidden':
+                try:
+                    with self.assertRaises(requests.HTTPError):
+            # ----------------------- API call UNDERTEST ------------------
+                        result = self.cli.upload_recording(
+                                tc['groupname'],
+                                tc['devicename'],
+                                tc['filename'],
+                                tc['prop'])
+            # ----------------------------------------------------------------
+                    print(self)
+                    #TODO: check the message returned
+                    # self.assertTrue(result['success'])
+                except Exception as e:
+                    self.fail("Unknown Exception_instance={})".format(e))
+            else:
+                # TODO: Check the mockrequest was called, and mockfile
+                self.assertTrue(False, 'Something not being checked ----------------------------')
+
 
 if __name__ == '__main__':
     unittest.main()
