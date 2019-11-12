@@ -1,32 +1,15 @@
-# To add a new cell, type '# %%'
-# To add a new markdown cell, type '# %% [markdown]'
-# %% Change working directory from the workspace root to the ipynb file location. Turn this addition off with the DataScience.changeDirOnImportExport setting
-# ms-python.python added
+
 import os
 print(os.getcwd())
 
-# %% 
-
 try:
 	# os.chdir(os.path.join(os.getcwd(), '..\\..\..\AppData\Local\Temp'))
-	os.chdir(os.path.join(os.getcwd(), 'python-api'))
+	# os.chdir(os.path.join(os.getcwd(), 'python-api'))
 	print(os.getcwd())
 except:
 	pass
-# %%
-from IPython import get_ipython
-
-# %% [markdown]
-# # TEST NOTEBOOK for Python REST API client  connect to  Cacophony project server
-# %% [markdown]
 # #### Configuration
 
-# %%
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '2')
-
-
-# %%
 import logging, sys, os
 logging.basicConfig(format='%(asctime)s : %(module)s :%(levelname)s : %(message)s', level=logging.DEBUG, stream=sys.stdout)
 logger = logging.getLogger()
@@ -48,9 +31,10 @@ from cacophonyapi.user  import UserAPI
 from cacophonyapi.config  import Config
 
 
-# %%
+# # %%
 config=Config().load_config(config_file=os.path.join(os.getcwd(),'.env','defaultconfig.json'))
 
+# %%
 
 # %%
 
@@ -62,12 +46,10 @@ cp_client.version
 # %% [markdown]
 # ### SHOW devices and groups
 
-# %%
-pd.DataFrame(cp_client.get_devices_as_json())
+print(pd.DataFrame(cp_client.get_devices_as_json()))
 
 
-# %%
-pd.DataFrame(cp_client.get_groups_as_json()["groups"])
+print(pd.DataFrame(cp_client.get_groups_as_json()["groups"]))
 
 # %% [markdown]
 # 
@@ -94,7 +76,7 @@ def recordingSubset(dataframe=None,startDateUTC=None,endDateUTC=None,fields=None
 def pandas_df_to_markdown_table(df,*args,**kwargs):
     df['index'] = df.index
     if 'columns' not in kwargs:
-        columns=df.columns.to_list()
+        columns=list(df.columns)
     else:
         columns=['index']+kwargs['columns']
 
@@ -148,7 +130,7 @@ from IPython.display import HTML
 # %%
 df['recordingDateTime_DT'] = pd.to_datetime(df['recordingDateTime'])
 df['Date']=df['recordingDateTime_DT'].dt.date # TODO: Check where we are using this
-df['recordingDateTime_DT_local'] = df['recordingDateTime_DT'].dt.tz_convert('Pacific/Auckland').dt.strftime('%Y/%m/%d %H:%M:%S')
+df['recordingDateTime_DT_local'] = df['recordingDateTime_DT'].dt.tz_localize('Pacific/Auckland').dt.strftime('%Y/%m/%d %H:%M:%S')
 df['recordingURL']=df['id'].apply(lambda id: '<a href="https://browse.cacophony.org.nz/recording/{id}">{id}</a>'.format(id=id))
 df['recordingURLmd']=df['id'].apply(lambda id: '[{id}](https://browse.cacophony.org.nz/recording/{id})'.format(id=id))
 

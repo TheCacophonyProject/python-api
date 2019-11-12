@@ -38,9 +38,9 @@ This API client requires Python 3.6 or later.
 ## API calls
 
 By default the most recent 100 recordings accessible to the user
-account are queried but `API.query()` does support a number of
+account are queried but `UserAPI.query()` does support a number of
 filtering options. The API server supports arbitrary queries so feel
-free to extend `API.query()` if required.
+free to extend `UserAPI.query()` if required.
 
 
 ## Configuration from a device perspecitve
@@ -52,16 +52,16 @@ free to extend `API.query()` if required.
 
 ## Testing
 
-#TODO: expand testing in both `client_test.py` and `client_test_with_server.py`
+#TODO: expand testing in both `test_client_user_without_server.py` and `test_client_user_with_server.py`
 
 Testing uses the pythony unittest framework where by both unit and integration testing is done.
 
-`test\test_client.py` is tests without requiring a server `nose2 --verbosity 2  CacophonyClient.test.test_client`
+`test\test_client_user_without_server.py` is tests without requiring a server `nose2 --verbosity 2  cacophonyapi.test.test_client_user_without_server`
 
-and `test\test_client_with_server` is full integration testing against a server. This is also part of the travis test `nose2 --verbosity 2 CacophonyClient.test.test_with_server`. 
+and `test\test_client_user_with_server` is full integration testing against a server. This is also part of the travis test `nose2 --verbosity 2 CacophonyClient.test.test_client_user_with_server`. 
 This integration testing does require a local server setup see [travis.yml](travis.yml)
 
-For individual test `nose2 --verbosity 2  CacophonyClient.test.test_client.mockedCacophonyServer.test_query`
+For individual test `nose2 --verbosity 2  cacophonyapi.test.test_client_user_with_server.mockedCacophonyServer.test_query`
 
 
 
