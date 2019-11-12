@@ -4,6 +4,8 @@
 VERSION = {"SERVER":"4.10.0","CLIENT":"4.10.0.alpha"}
 from .apibase import APIBase
 
+import os,re
+
 import json
 import requests
 from requests_toolbelt import MultipartEncoder
@@ -13,9 +15,13 @@ from urllib.parse import urljoin
 class UserAPI(APIBase):
     def __init__(self, baseurl, username, password):
         super().__init__(baseurl, username, password, "user")
-    
+
+    @property
     def version(self):
-        return VERSION
+        with open(os.path.join(os.path.dirname(__file__), 
+                '__init__.py')) as f:
+            version = re.search("__version__ = '([^']+)'", f.read()).group(1)
+        return version
 
     def get(self, recording_id):
         url = urljoin(self._baseurl, "/api/v1/recordings/" + str(recording_id))
