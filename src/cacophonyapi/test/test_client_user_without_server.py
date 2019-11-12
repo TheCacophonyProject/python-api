@@ -27,6 +27,8 @@ from __future__ import unicode_literals
 import random
 import socket
 import unittest
+from unittest.mock import patch
+from unittest.mock import mock_open
 import warnings
 import types
 
@@ -38,6 +40,7 @@ import requests_mock
 
 from datetime import datetime
 import random
+from requests_toolbelt import MultipartEncoder
 
 from cacophonyapi.user  import UserAPI
 
@@ -92,7 +95,7 @@ def _mocked_session(cli, method="GET", status_code=200, content=""):
 
     return mock.patch.object(cli._session, 'request', side_effect=request)
 
-class mockedCacophonyServer(unittest.TestCase):
+class Mocked_cacophonyapi(unittest.TestCase):
     """Test client calls to the mocked CacophonyServer object."""
 
     def setUp(self):
@@ -125,7 +128,25 @@ class mockedCacophonyServer(unittest.TestCase):
             # print(m.last_request.body)
             self.assertEqual(defaults['apiURL'], cli._baseurl)
  
+    def test_version(self):
+        """Test UserAPI.version"""
+        with requests_mock.Mocker() as m:
+            m.register_uri(
+                requests_mock.POST,
+                "{apiURL}/authenticate_user".format(apiURL=defaults["apiURL"]),
+                status_code=204
+            )
+            cli = UserAPI(baseurl=defaults["apiURL"], 
+                            username=defaults["defaultUsername"], 
+                            password=defaults["defaultuserPassword"])
+            # print(m.last_request.body)
+            self.assertEqual(defaults['apiURL'], cli._baseurl)
 
+            versionResult = cli.version
+            print('version:{}'.format(versionResult))
+            self.assertTrue(isinstance(versionResult,str))
+            self.assertTrue(len(versionResult)>0)
+ 
 
     def test_query(self):
         """Test UserAPI.query from mocked CacophonyServer object."""
@@ -327,6 +348,103 @@ class mockedCacophonyServer(unittest.TestCase):
             self.assertEqual(result, mock_postData)
             self.assertEqual(m.last_request.qs, mock_qs)
             self.assertEqual(m.last_request.path, mock_apiPath)
+
+    def test_valid_upload_recording(self):
+        """Test UserAPI.upload_recordings ( parameters passed: groupname, devicename, filename, props) to mocked CacophonyServer object."""
+        #TODO: Construct the data to pass in the post
+        mock_apiPath= lambda devicename,groupname: '/api/v1/recordings/device/{devicename}/group/{groupname}'.format(devicename=devicename, groupname=groupname)
+
+        testcases = [
+            {'filename':"test1.cptv",
+              'mock_file.side_effect':None,
+              'devicename':'deviceTEST1234',
+              'groupname':'groupTEST1234',
+              'prop':None,
+              'expectedProp':{'type':'thermalRaw'},
+              'mockRequestStatusCode':200
+             },
+            {'filename':"test1.cptv",
+              'mock_file.side_effect':IOError(),
+              'devicename':'deviceTEST1234',
+              'groupname':'groupTEST1234',
+              'prop':None,
+              'expectedProp':{'type':'thermalRaw'},
+              'mockRequestStatusCode':200
+             },
+            {'filename':"test2.mp3",
+              'mock_file.side_effect':None,
+              'devicename':'deviceTEST1234',
+              'groupname':'groupTEST1234',
+              'prop':None,
+              'expectedProp':{'type':'audio'},
+              'mockRequestStatusCode':200
+             },
+            {'filename':"test3.xyz",
+              'mock_file.side_effect':None,
+              'devicename':'deviceTEST1234',
+              'groupname':'groupTEST1234',
+              'prop':None,
+              'expectedProp':None,
+              'mockRequestStatusCode':200
+             }
+        ]
+
+        # mock_postData = {"recordings": mock_recordings}
+
+        # mock_json_result = {"devices":{"rows":{'key1': 'value1', 'key2': 'value2'}}}
+        mock_qs = {}
+        for tc in testcases:
+            print(tc)
+            #setup mock open_file:
+            m = msrc = mock_open(read_data=b'0123456789012345678901234') #That create a handle for the first file
+            mdst = mock_open() #That create a handle for the second file
+            mdst.side_effect=IOError("no file")
+            m.side_effect=[msrc.return_value,mdst.return_value] # Mix the two handles in one of mock the we will use to patch open
+            with patch("builtins.open", m ) as mock_file:
+
+                # setup file side effects 
+                if tc['mock_file.side_effect'] is not None:
+                    mock_file.side_effect = tc['mock_file.side_effect']
+
+                # multipart_data = MultipartEncoder( 
+                #     fields={"file": ("file.dat", f), "data": json.dumps(tc['expectedProp'])} 
+                # ) 
+                # mock_postHeaders = { 
+                #         "Content-Type": multipart_data.content_type, 
+                #         "Authorization": self._token, 
+                #     } 
+
+                # TO suppress failure by MultiPartEncoder
+                del(mock_file.return_value.getvalue)
+
+                with requests_mock.Mocker() as m:
+                    m.register_uri(
+                        requests_mock.POST,
+                        "{apiURL}{apiPath}".format(
+                            apiURL=defaults["apiURL"], 
+                            apiPath=mock_apiPath(tc['devicename'],tc['groupname'])
+                            ),
+                        # data=mock_postData,
+                        # headers=mock_postHeaders,
+                        status_code=tc['mockRequestStatusCode']
+                    )
+
+# ----------------------- API call UNDERTEST ------------------
+                    result = self.cli.upload_recording(
+                            tc['groupname'],
+                            tc['devicename'],
+                            tc['filename'],
+                            tc['prop'])
+# ----------------------------------------------------------------
+                    print(result)                    
+                    mock_file.assert_called_with(tc['filename'], 'rb')
+
+                    # print(m.last_request.qs)
+                    self.assertEqual(result, mock_postData)
+                    self.assertEqual(m.last_request.qs, mock_qs)
+                    self.assertEqual(m.last_request.path, mock_apiPath)
+ 
+
 
     def test_valid_download(self):
         """Test UserAPI.download with a valid recording_id from mocked CacophonyServer object."""

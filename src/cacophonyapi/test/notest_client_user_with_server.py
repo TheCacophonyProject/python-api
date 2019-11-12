@@ -26,7 +26,7 @@ import requests
 import requests.exceptions
 import requests_mock
 
-
+import os
 from cacophonyapi.user  import UserAPI
 
 
@@ -81,7 +81,7 @@ def _mocked_session(cli, method="GET", status_code=200, content=""):
     return mock.patch.object(cli._session, 'request', side_effect=request)
 
 
-class TestCacophonyClient(unittest.TestCase):
+class liveTESTcacophonyapi(unittest.TestCase):
     """Set up the TestCacophonyClient object."""
 
     def setUp(self):
@@ -100,6 +100,30 @@ class TestCacophonyClient(unittest.TestCase):
                            username=defaults["defaultUsername"], 
                            password=defaults["defaultuserPassword"])
         self.assertEqual(defaults['apiURL'], cli._baseurl)
+
+    def test_upload_recording(self):
+        """Test UserAPI.upload_recordings ( parameters passed: groupname, devicename, filename, props) to mocked CacophonyServer object.
+        Default test user is read only so should fail with permission error"""
+        testcases = [
+            {'filename':os.path.join(os.path.dirname(__file__),"test1.cptv"),
+              'mock_file.side_effect':None,
+              'devicename':'test-device',
+              'groupname':'test-group',
+              'prop':None,
+              'expectedProp':{'type':'thermalRaw'},
+              'mockRequestStatusCode':200
+             },]
+        for tc in testcases:
+            print(tc)
+# ----------------------- API call UNDERTEST ------------------
+            result = self.cli.upload_recording(
+                    tc['groupname'],
+                    tc['devicename'],
+                    tc['filename'],
+                    tc['prop'])
+# ----------------------------------------------------------------
+            print(result)
+            self.assertTrue(result['success'])
 
 if __name__ == '__main__':
     unittest.main()
