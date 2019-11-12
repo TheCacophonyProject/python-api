@@ -153,25 +153,109 @@ class Mocked_cacophonyapi(unittest.TestCase):
 
     def test_query(self):
         """Test UserAPI.query from mocked CacophonyServer object."""
-        with requests_mock.Mocker() as m:
-            m.register_uri(
-                requests_mock.GET,
-                "{apiURL}/api/v1/recordings".format(apiURL=defaults["apiURL"]),
-                json={"rows":{'key1': 'value1', 'key2': 'value2'}}, status_code=200
-            )
-            _ = self.cli.query(
-                    endDate=_strToSqlDateTime("2019-11-06 06:30:00"),
-                    startDate=_strToSqlDateTime("2019-11-01 19:00:00"),
-                    limit=300,
-                    offset=0,
-                    tagmode="any")
+        testcases = [
+             {'apiPATH':'/api/v1/recordings',
+             'parameters':{'endDate':_strToSqlDateTime("2019-11-06 06:30:00"),
+                        'startDate':_strToSqlDateTime("2019-11-01 19:00:00"),
+                        'limit':300,
+                        'offset':0,
+                        'tagmode':"any"
+                        },
+              'expectedRequestQS':{'where': 
+                    ['{"recordingdatetime": {"$gte": "2019-11-01t19:00:00", "$lte": "2019-11-06t06:30:00"}}'], 
+                        'limit': ['300'], 
+                        'offset': ['0'], 
+                        'tagmode': ['any']},
+              'expectedResult':{'outcome':'success', 
+                                'validator':lambda test: test},
+              'mockRequestJsonResponse':{"rows":{'key1': 'value1', 'key2': 'value2'}},
+              'mockRequestStatusCode':200
+             },
+             #TODO: check expectedRequestQS 'tags'
+             {
+             'Description': """
+              All query paramters excluding raw_json
+              """,
+             'apiPATH':'/api/v1/recordings',
+             'parameters':{'endDate':_strToSqlDateTime("2019-11-06 06:30:00"),
+                        'startDate':_strToSqlDateTime("2019-11-01 19:00:00"),
+                        'devices': ['test_device1','test_device2'],
+                        'type_': 'thermalRaw',
+                        'min_secs':15, #duration
+                        'limit':300,
+                        'offset':0,
+                        'tagmode':"any",
+                        'tags': json.dumps('{fields:["animal"],unique:false}'),
+                        },
+              'expectedRequestQS':{
+                  'where': 
+                  ['{"type": "thermalraw", "duration": {"$gte": 15}, "recordingdatetime": {"$gte": "2019-11-01t19:00:00", "$lte": "2019-11-06t06:30:00"}, "deviceid": ["test_device1", "test_device2"]}'], 
+                  'limit': ['300'], 
+                  'offset': ['0'], 
+                  'tagmode': ['any'],
+                  'tags': ['"\\"{fields:[\\\\\\"animal\\\\\\"],unique:false}\\""']},
+              'expectedResult':{'outcome':'success', 
+                                'validator':lambda test: test},
+              'mockRequestJsonResponse':{"rows":{'key1': 'value1', 'key2': 'value2'}},
+              'mockRequestStatusCode':200
+             },
 
-            # print(m.last_request.qs)
+             #TODO: check expectedRequestQS 'tags'
+             {
+             'Description': """
+              All query paramters including raw_json=True
+              """,
+             'apiPATH':'/api/v1/recordings',
+             'parameters':{'endDate':_strToSqlDateTime("2019-11-06 06:30:00"),
+                        'startDate':_strToSqlDateTime("2019-11-01 19:00:00"),
+                        'devices': ['test_device1','test_device2'],
+                        'type_': 'thermalRaw',
+                        'min_secs':15, #duration
+                        'limit':300,
+                        'offset':0,
+                        'tagmode':"any",
+                        'tags': json.dumps('{fields:["animal"],unique:false}'),
+                        'raw_json':True,
+                        },
+              'expectedRequestQS':{
+                  'where': 
+                  ['{"type": "thermalraw", "duration": {"$gte": 15}, "recordingdatetime": {"$gte": "2019-11-01t19:00:00", "$lte": "2019-11-06t06:30:00"}, "deviceid": ["test_device1", "test_device2"]}'], 
+                  'limit': ['300'], 
+                  'offset': ['0'], 
+                  'tagmode': ['any'],
+                  'tags': ['"\\"{fields:[\\\\\\"animal\\\\\\"],unique:false}\\""']},
+              'expectedResult':{'outcome':'successRawData', 
+                                'validator':lambda test: test},
+              'mockRequestJsonResponse':{'key1': 'value1', 'key2': 'value2'},
+              'mockRequestStatusCode':200
+             },
 
-            self.assertEqual(
-                m.last_request.qs,
-                {'where': ['{"recordingdatetime": {"$gte": "2019-11-01t19:00:00", "$lte": "2019-11-06t06:30:00"}}'], 'limit': ['300'], 'offset': ['0'], 'tagmode': ['any']}
-            )
+        ]
+
+
+        for tc in testcases:
+            print(tc)
+            with requests_mock.Mocker() as m:
+                m.register_uri(
+                    requests_mock.GET,
+                    "{apiURL}{apiPATH}".format(apiURL=defaults["apiURL"],apiPATH=tc['apiPATH']),
+                    json=tc['mockRequestJsonResponse'],
+                    status_code=200
+                )
+                _ = self.cli.query(**tc['parameters'])
+
+                # _ = self.cli.query(
+                #         endDate=_strToSqlDateTime("2019-11-06 06:30:00"),
+                #         startDate=_strToSqlDateTime("2019-11-01 19:00:00"),
+                #         limit=300,
+                #         offset=0,
+                #         tagmode="any")
+
+                print(m.last_request.qs)
+
+                self.assertEqual(
+                    m.last_request.qs,tc['expectedRequestQS']
+                )
 
     def test_get_valid_recordingId(self):
         """Test UserAPI.get with a valid recording_id from mocked CacophonyServer object."""
@@ -421,6 +505,7 @@ class Mocked_cacophonyapi(unittest.TestCase):
 
 
         for tc in testcases:
+            #TODO: pretty print
             print(tc)
             """
                 This Test is tough to design/debug
