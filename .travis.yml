@@ -46,7 +46,8 @@ before_script:
   - sudo docker exec cacophony-api sh -c "sudo -i -u postgres psql cacophonytest -f/db-seed.sql"
 script:
   - if [ -n "${TOX_ENV}" ]; then tox -e "${TOX_ENV}"; else tox; fi
-  - go vet ./... && go test ./...
+  - nose2 --verbose --with-coverage --coverage-report html --coverage cacophonyapi
+
 
 after_success:
     - if [ "${TOX_ENV}" == "coverage" ] ; then coveralls; fi
