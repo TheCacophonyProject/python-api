@@ -697,31 +697,7 @@ class Mocked_cacophonyapi(unittest.TestCase):
             self.assertEqual(buffer,expectedReturn1)
 
 
-class FakeClient(UserAPI):
-    """Set up a fake client instance of UserAPI."""
 
-    def __init__(self, *args, **kwargs):
-        """Initialize an instance of the FakeClient object."""
-        super(FakeClient, self).__init__(*args, **kwargs)
-    #TODO: recordings query instead of query
-    # def query(self,
-    #           query,
-    #           params=None,
-    #           expected_response_code=200,
-    #           database=None):
-    #     """Query data from the FakeClient object."""
-    #     if query == 'Fail':
-    #         raise Exception("Fail")
-    #     elif query == 'Fail once' and self._host == 'host1':
-    #         raise Exception("Fail Once")
-    #     elif query == 'Fail twice' and self._host in 'host1 host2':
-    #         raise Exception("Fail Twice")
-    #     else:
-    #         return "Success"
-
-# if __name__ == '__main__':
-#     import nose2
-#     nose2.main(verbosity=2)
 
 if __name__ == '__main__':
     unittest.main()
