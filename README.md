@@ -8,8 +8,21 @@ Python client for the REST [Cacophony API server](https://github.com/TheCacophon
 This API client requires Python 3.6 or later.
 
 * Create a virtualenv using your preferred method.
-* Install dependencies: `pip install -r requirements.txt`
-* python setup.py install
+* at present the library is not yet in PyPi
+* install from github with clone following:
+
+>```
+>git clone https://github.com/TheCacophonyProject/python-api.git <YOURDIR>
+>cd <YOURDIR>
+>pip install .
+>```
+
+for Development support suggest you use the dev requirements
+>```
+>pip install -r dev-requirements
+>```
+
+
 
 ## Configuration from a user perspecitve
 >### Client Instance setup
