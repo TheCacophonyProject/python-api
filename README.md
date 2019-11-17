@@ -76,5 +76,5 @@ This integration testing does require a local server setup see [travis.yml](trav
 
 For individual test `nose2 --verbosity 2  cacophonyapi.test.test_client_user_with_server.mockedCacophonyServer.test_query`
 
-
+#TODO: Docs improve PEP257 compliance for cacophonyapi UserApi etc,  don't know why it is not failing `tox -e pep257`
 
