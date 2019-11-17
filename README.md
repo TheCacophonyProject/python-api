@@ -28,20 +28,20 @@ for Development support suggest you use the dev requirements
 >### Client Instance setup
 >Open an instance of the client and use credentials directly
 >``` python
->from cacophonyREST_python_clientV1.cacophonyClient.client import CacophonyClient
->cp_client = CacophonyClient(baseurl=<SERVER-URL>, 
+>from cacophonyapi.user  import UserAPI
+>cp_client = UserAPI(baseurl=<SERVER-URL>, 
 >                            username=<USER-NAME>, 
 >                            password=<USER-PASSWORD>)
 >```
 >or alternatively with credential stored  in `defaultconfig.json`
 >```python
->from cacophonyREST_python_clientV1.cacophonyClient.client import CacophonyClient
->from cacophonyREST_python_clientV1.cacophonyClient.config import Config
+>from cacophonyapi.user  import UserAPI
+>from cacophonyapi.config  import Config
 >
 >config=Config().load_config(config_file=os.path.join(
 >    os.getcwd(),'defaultconfig.json'))
 >
->cp_client = CacophonyClient(config.api_url,
+>cp_client = UserAPI(config.api_url,
 >                            username=config.admin_username ,
 >                            password=config.admin_password)
 >```

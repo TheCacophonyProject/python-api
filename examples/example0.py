@@ -1,13 +1,5 @@
-
-import os
-print(os.getcwd())
-
-try:
-	# os.chdir(os.path.join(os.getcwd(), '..\\..\..\AppData\Local\Temp'))
-	# os.chdir(os.path.join(os.getcwd(), 'python-api'))
-	print(os.getcwd())
-except:
-	pass
+# -*- coding: utf-8 -*-
+"""Example of querying the Cacophony Project Servers via a REST API using a Python Client."""
 # #### Configuration
 
 import logging, sys, os
@@ -57,7 +49,7 @@ print(pd.DataFrame(cp_client.get_groups_as_json()["groups"]))
 # 
 #     strToSqlDateTime : Generates a datatime object from a string
 # 
-#     recordingSubset : Retrieve a subset of dataframe
+#     recordingSubset : Retrieve a subset of dataframe by recording datetime and columns
 # 
 #     pandas_df_to_markdown_table : Displays a markdown table from a dataframe
 #     
@@ -69,11 +61,25 @@ print(pd.DataFrame(cp_client.get_groups_as_json()["groups"]))
 strToSqlDateTime = lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 
 def recordingSubset(dataframe=None,startDateUTC=None,endDateUTC=None,fields=None):
+    """Generate a DataFrame from a subset of recording time points of an existing Dataframe.
+
+    Returns a Pandas Dataframe subset of recordingings by date and Time inclusive of the lower and upper limit. NB date ranges must be in GMT
+
+    :param startDateUTC: lower value for recordings to select
+    :param endDateUTC: upper value (inclusive) of recordings to select
+    :param fields: a list of columns to include in the subset of recordings
+    """
     # fields = ["recordingDateTime_DT_local",'recordingURL','comment']
     return dataframe[(df.recordingDateTime >= startDateUTC) & (df.recordingDateTime <= endDateUTC)].loc[:,
         fields]
 
 def pandas_df_to_markdown_table(df,*args,**kwargs):
+    """Generate a Markdown Display (IPython) of the Pandas Dataframe.
+
+    Displays in a IPython environment such as Jupyter Notebook
+
+    :param columns: [Optional, default 'list(df.columns)'] A list of columns to display
+    """
     df['index'] = df.index
     if 'columns' not in kwargs:
         columns=list(df.columns)
@@ -90,6 +96,12 @@ def pandas_df_to_markdown_table(df,*args,**kwargs):
 
 
 def pandas_df_to_markdown_table_string(df,*args,**kwargs):
+    """Generate a Markdown string representing the Pandas Dataframe.
+
+    Returns a string representing the dataframe in markdown syntax
+
+    :param columns: [Optional, default 'list(df.columns)'] A list of columns to display
+    """
     df['index'] = df.index
     if 'columns' not in kwargs:
         columns=df.columns.to_list()
