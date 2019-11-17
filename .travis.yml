@@ -18,16 +18,14 @@ addons:
 
 matrix:
   include:
-    - python: 3.7
+    - python: 3.6
       env: TOX_ENV=pep257
-    - python: 3.7
+    - python: 3.6
       env: TOX_ENV=docs
-    - python: 3.7
+    - python: 3.6
       env: TOX_ENV=flake8
-    - python: 3.7
+    - python: 3.6
       env: TOX_ENV=coverage
-    - python: 3.7
-      env: TOX_ENV=mypy
 
 env:
   - CACOPHONY_VER=v4.10.0  # 2019-05-08 https://github.com/TheCacophonyProject/cacophony-api/releases/tag/v4.10.0   0c7e3bf14a9464e36dc8146a72d7e13a5441f34f
