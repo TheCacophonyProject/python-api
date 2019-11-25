@@ -17,7 +17,7 @@ addons:
     - wget
 env:
   global:
-    - CACOPHONY_VER=v4.10.0  # 2019-05-08 https://github.com/TheCacophonyProject/cacophony-api/releases/tag/v4.10.0   0c7e3bf14a9464e36dc8146a72d7e13a5441f34f
+    - CACOPHONY_API_VER=v4.10.0  # 2019-05-08 https://github.com/TheCacophonyProject/cacophony-api/releases/tag/v4.10.0   0c7e3bf14a9464e36dc8146a72d7e13a5441f34f
 
 matrix:
   include:
@@ -35,7 +35,7 @@ install:
   - pip install tox-travis
   - pip install setuptools
   - pip install coveralls
-  - git clone --branch "${CACOPHONY_VER}"  "https://github.com/TheCacophonyProject/cacophony-api"
+  - git clone --branch "${CACOPHONY_API_VER}"  "https://github.com/TheCacophonyProject/cacophony-api"
   - cd cacophony-api
   - ./run --isolate --background
   - cd ..
