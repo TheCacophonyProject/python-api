@@ -35,7 +35,7 @@ setup(
     license='GNU AFFERO GENERAL PUBLIC License 3 19 November 2007',
     packages=find_packages(exclude=['tests']),
     install_requires=[
-        "requests~=2.17.0",
+        "requests>=2.20.0",
         "requests-toolbelt~=0.9.1",
     ],
     extras_require={'test': [
