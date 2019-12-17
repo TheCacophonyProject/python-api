@@ -99,6 +99,55 @@ class UserAPI(APIBase):
         else:
             return data["rows"]
 
+    def report(
+        self,
+        startDate=None,
+        endDate=None,
+        min_secs=0,
+        limit=100,
+        offset=0,
+        tagmode=None,
+        tags=None,
+        filterOptions=None,
+        devices=None,
+        where=None,
+        jwt=None,
+        raw=False,
+    ):
+        url = urljoin(self._baseurl, "/api/v1/recordings/report")
+        if where is None:
+            where = {}
+        if min_secs is not None:
+            where["duration"] = {"$gte": min_secs}
+        if startDate is not None:
+            where["recordingDateTime"] = {"$gte": startDate.isoformat()}
+        if endDate is not None:
+            where.setdefault("recordingDateTime", {})["$lte"] = endDate.isoformat()
+        if devices is not None:
+            where["DeviceId"] = devices
+        params = {"where": json.dumps(where)}
+
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
+        if tagmode is not None:
+            params["tagMode"] = tagmode
+        if tags is not None:
+            params["tags"] = json.dumps(tags)
+
+        r = requests.get(url, params=params, headers=self._auth_header)
+        data = check_response(r)
+        if raw:
+            return data
+        else:
+            if type(data)==bytes:
+                return data.decode('utf-8')
+            else:
+                return ""
+
+
+
     def download(self, recording_id):
         return self._download_recording(recording_id, "downloadFileJWT")
 
@@ -169,7 +218,12 @@ class UserAPI(APIBase):
 
 
 def check_response(r):
-    data = r.json()
+    try:
+        data = r.json()
+    except json.decoder.JSONDecodeError:
+        data = r.content
+    except Exception as e: 
+        print("exception ",e)
     if r.status_code == 200:
         return data
     if r.status_code in (400, 422):
