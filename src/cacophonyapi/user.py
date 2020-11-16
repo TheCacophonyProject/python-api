@@ -19,7 +19,7 @@ class UserAPI(APIBase):
     @property
     def version(self):
         with open(os.path.join(os.path.dirname(__file__), "__init__.py")) as f:
-            version = re.search("__version__ = '([^']+)'", f.read()).group(1)
+            version = re.search('__version__ = "([^\']+)"', f.read()).group(1)
         return version
 
     def get(self, recording_id):
