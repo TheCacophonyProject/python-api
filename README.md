@@ -63,10 +63,9 @@ Testing uses the pythony unittest framework where by both unit and integration t
 
 `test\test_client_user_without_server.py` is tests without requiring a server `nose2 --verbosity 2  cacophonyapi.test.test_client_user_without_server`
 
-and `test\test_client_user_with_server` is full integration testing against a server. This is also part of the travis test `nose2 --verbosity 2 CacophonyClient.test.test_client_user_with_server`. 
+and `test\test_client_user_with_server` is full integration testing against a server. This is also part of the travis test `nose2 --verbosity 2 CacophonyClient.test.test_client_user_with_server`.
 This integration testing does require a local server setup see [travis.yml](travis.yml)
 
 For individual test `nose2 --verbosity 2  cacophonyapi.test.test_client_user_with_server.mockedCacophonyServer.test_query`
 
 #TODO: Docs improve PEP257 compliance for cacophonyapi UserApi etc,  don't know why it is not failing `tox -e pep257`
-

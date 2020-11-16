@@ -10,10 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import re
 
 # -- Project information -----------------------------------------------------
 
@@ -24,7 +23,10 @@ copyright = (
 author = "Anthony Uphof, Giampaolo Ferraro, Cameron Ryan-Pears, Menno Finlay-Smits"
 
 # The full version, including alpha/beta/rc tags
-release = "4.10.0.alpha.1"
+with open(
+    os.path.join(os.path.dirname(__file__), "src", "cacophonyapi", "__init__.py")
+) as f:
+    release = re.search('__version__ = "([^\']+)"', f.read()).group(1)
 
 
 # -- General configuration ---------------------------------------------------
