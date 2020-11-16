@@ -24,7 +24,9 @@ author = "Anthony Uphof, Giampaolo Ferraro, Cameron Ryan-Pears, Menno Finlay-Smi
 
 # The full version, including alpha/beta/rc tags
 with open(
-    os.path.join(os.path.dirname(__file__), "src", "cacophonyapi", "__init__.py")
+    os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "src", "cacophonyapi", "__init__.py"
+    )
 ) as f:
     release = re.search('__version__ = "([^\']+)"', f.read()).group(1)
 
