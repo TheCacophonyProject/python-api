@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Python client for Cacophony Project Server."""
 
-VERSION = {"SERVER":"4.10.0","CLIENT":"4.10.0.alpha"}
+VERSION = {"SERVER": "4.10.0", "CLIENT": "4.10.0.alpha"}
 from .apibase import APIBase
 
-import os,re
+import os, re
 
 import json
 import requests
@@ -18,8 +18,7 @@ class UserAPI(APIBase):
 
     @property
     def version(self):
-        with open(os.path.join(os.path.dirname(__file__), 
-                '__init__.py')) as f:
+        with open(os.path.join(os.path.dirname(__file__), "__init__.py")) as f:
             version = re.search("__version__ = '([^']+)'", f.read()).group(1)
         return version
 
@@ -34,7 +33,7 @@ class UserAPI(APIBase):
         )
         r = requests.get(url, headers=self._auth_header)
         return check_response(r)
- 
+
     def get_groups_as_json(self):
         return self._get_all("/api/v1/groups")
 
@@ -42,10 +41,13 @@ class UserAPI(APIBase):
         return self._get_all("/api/v1/devices")["devices"]["rows"]
 
     def _get_all(self, url):
-        r = requests.get(urljoin(self._baseurl, url), params={"where": "{}"},
-                                                    headers=self._auth_header)
+        r = requests.get(
+            urljoin(self._baseurl, url),
+            params={"where": "{}"},
+            headers=self._auth_header,
+        )
         return check_response(r)
-        
+
     def reprocess(self, recordings: []):
         url = urljoin(self._baseurl, "/api/v1/reprocess")
         r = requests.post(
@@ -121,8 +123,7 @@ class UserAPI(APIBase):
         yield from r.iter_content(chunk_size=4096)
 
     def upload_recording(self, groupname, devicename, filename, props=None):
-        """Upload a recording on behalf of a device.
-        """
+        """Upload a recording on behalf of a device."""
         url = urljoin(
             self._baseurl,
             "/api/v1/recordings/device/{}/group/{}".format(devicename, groupname),
