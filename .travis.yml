@@ -33,10 +33,12 @@ install:
 - cd ..
 - docker cp test-files/db-test-seed.sql cacophony-api:/db-seed.sql
 before_script:
+- pip install black
 - "./cacophony-api/wait-for-api || { docker ps; docker logs cacophony-api; exit 1;
   }"
 - sudo docker exec cacophony-api sh -c "sudo -i -u postgres psql cacophonytest -f/db-seed.sql"
 script:
+- ./check-style
 - if [ -n "${TOX_ENV}" ]; then tox -e "${TOX_ENV}"; else tox; fi
 after_success:
 - if [ "${TOX_ENV}" == "coverage" ] ; then coveralls; fi
