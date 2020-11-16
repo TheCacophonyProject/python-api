@@ -27,21 +27,22 @@ import requests.exceptions
 import requests_mock
 
 import os
-from cacophonyapi.user  import UserAPI
+from cacophonyapi.user import UserAPI
 
 
 defaults = {
-    "apiURL"              : "http://localhost:1080",
-    "defaultDevice"       : "test-device",
-    "defaultPassword"     : "test-password",
-    "defaultGroup"        : "test-group",
-    "defaultGroup2"       : "test-group-2",
-    "defaultUsername"     : "cacophony-client-user-test",
-    "defaultuserPassword" : "test-user-password",
-    "filesURL"            : "/files",
-    "hostsFileString"     : "`127.0.0.1 raspberrypi::1 localhost"
+    "apiURL": "http://localhost:1080",
+    "defaultDevice": "test-device",
+    "defaultPassword": "test-password",
+    "defaultGroup": "test-group",
+    "defaultGroup2": "test-group-2",
+    "defaultUsername": "cacophony-client-user-test",
+    "defaultuserPassword": "test-user-password",
+    "filesURL": "/files",
+    "hostsFileString": "`127.0.0.1 raspberrypi::1 localhost",
 }
-#TODO: test a more complex password 
+# TODO: test a more complex password
+
 
 def _build_response_object(status_code=200, content=""):
     resp = requests.Response()
@@ -58,10 +59,10 @@ def _mocked_session(cli, method="GET", status_code=200, content=""):
         c = content
 
         # Check method
-        assert method == kwargs.get('method', 'GET')
+        assert method == kwargs.get("method", "GET")
 
-        if method == 'POST':
-            data = kwargs.get('data', None)
+        if method == "POST":
+            data = kwargs.get("data", None)
 
             if data is not None:
                 # Data must be a string
@@ -78,7 +79,7 @@ def _mocked_session(cli, method="GET", status_code=200, content=""):
 
         return _build_response_object(status_code=status_code, content=c)
 
-    return mock.patch.object(cli._session, 'request', side_effect=request)
+    return mock.patch.object(cli._session, "request", side_effect=request)
 
 
 class liveTESTcacophonyapi(unittest.TestCase):
@@ -87,68 +88,76 @@ class liveTESTcacophonyapi(unittest.TestCase):
     def setUp(self):
         """Initialize an instance of TestInfluxDBClient object."""
         # By default, raise exceptions on warnings
-        warnings.simplefilter('error', FutureWarning)
+        warnings.simplefilter("error", FutureWarning)
 
-        self.cli = UserAPI(baseurl=defaults["apiURL"], 
-                           username=defaults["defaultUsername"], 
-                           password=defaults["defaultuserPassword"])
-
+        self.cli = UserAPI(
+            baseurl=defaults["apiURL"],
+            username=defaults["defaultUsername"],
+            password=defaults["defaultuserPassword"],
+        )
 
     def test_scheme(self):
         """Set up the test schema for TestCacophonyClient object."""
-        cli = UserAPI(baseurl=defaults["apiURL"], 
-                           username=defaults["defaultUsername"], 
-                           password=defaults["defaultuserPassword"])
-        self.assertEqual(defaults['apiURL'], cli._baseurl)
+        cli = UserAPI(
+            baseurl=defaults["apiURL"],
+            username=defaults["defaultUsername"],
+            password=defaults["defaultuserPassword"],
+        )
+        self.assertEqual(defaults["apiURL"], cli._baseurl)
 
     def test_upload_recording(self):
         """Test UserAPI.upload_recordings ( parameters passed: groupname, devicename, filename, props) to mocked CacophonyServer object.
         Default test user is read only so should fail with permission error"""
         testcases = [
-            {'filename':os.path.join(os.path.dirname(__file__),"test1.cptv"),
-              'mock_file.side_effect':None,
-              'devicename':'test-device',
-              'groupname':'test-group',
-              'prop':None,
-              'expectedProp':{'type':'thermalRaw'},
-              'expectedResult':{'outcome':'failureHTTPforbidden', 
-                                'validator':lambda test: test},
-              'mockRequestStatusCode':403
-             },]
+            {
+                "filename": os.path.join(os.path.dirname(__file__), "test1.cptv"),
+                "mock_file.side_effect": None,
+                "devicename": "test-device",
+                "groupname": "test-group",
+                "prop": None,
+                "expectedProp": {"type": "thermalRaw"},
+                "expectedResult": {
+                    "outcome": "failureHTTPforbidden",
+                    "validator": lambda test: test,
+                },
+                "mockRequestStatusCode": 403,
+            },
+        ]
         for tc in testcases:
             print(tc)
-            if tc['expectedResult']['outcome']=='success':
-    # ----------------------- API call UNDERTEST ------------------
+            if tc["expectedResult"]["outcome"] == "success":
+                # ----------------------- API call UNDERTEST ------------------
                 result = self.cli.upload_recording(
-                        tc['groupname'],
-                        tc['devicename'],
-                        tc['filename'],
-                        tc['prop'])
-    # ----------------------------------------------------------------
+                    tc["groupname"], tc["devicename"], tc["filename"], tc["prop"]
+                )
+                # ----------------------------------------------------------------
                 print(result)
-                self.assertTrue(result['success'])
+                self.assertTrue(result["success"])
 
-            elif tc['expectedResult']['outcome']=='failureHTTPforbidden':
+            elif tc["expectedResult"]["outcome"] == "failureHTTPforbidden":
                 try:
                     with self.assertRaises(requests.HTTPError):
-            # ----------------------- API call UNDERTEST ------------------
+                        # ----------------------- API call UNDERTEST ------------------
                         result = self.cli.upload_recording(
-                                tc['groupname'],
-                                tc['devicename'],
-                                tc['filename'],
-                                tc['prop'])
-            # ----------------------------------------------------------------
+                            tc["groupname"],
+                            tc["devicename"],
+                            tc["filename"],
+                            tc["prop"],
+                        )
+                    # ----------------------------------------------------------------
                     print(self)
-                    #TODO: check the message returned
+                    # TODO: check the message returned
                     # self.assertTrue(result['success'])
                 except Exception as e:
                     self.fail("Unknown Exception_instance={})".format(e))
             else:
                 # TODO: Check the mockrequest was called, and mockfile
-                self.assertTrue(False, 'Something not being checked ----------------------------')
+                self.assertTrue(
+                    False, "Something not being checked ----------------------------"
+                )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
 
 """
