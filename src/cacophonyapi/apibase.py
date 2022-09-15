@@ -11,10 +11,16 @@ class APIBase:
         self._auth_header = {"Authorization": self._token}
 
     def _get_jwt(self, password, logintype):
-        nameProp = logintype + "name"
-
         url = urljoin(self._baseurl, "/authenticate_" + logintype)
-        r = requests.post(url, data={nameProp: self._loginname, "password": password})
+        if logintype == "user":
+            r = requests.post(
+                url, data={"email": self._loginname, "password": password}
+            )
+        else:
+            nameProp = logintype + "name"
+            r = requests.post(
+                url, data={nameProp: self._loginname, "password": password}
+            )
 
         if r.status_code == 200:
             return r.json().get("token")
