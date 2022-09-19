@@ -51,7 +51,7 @@ class UserAPI(APIBase):
     def reprocess(self, recordings: []):
         url = urljoin(self._baseurl, "/api/v1/reprocess")
         r = requests.post(
-            url, headers=self._auth_header, data={"recordings": json.dumps(recordings)}
+            url, headers=self._auth_header, data={"recordings": recordings}
         )
         return check_response(r)
 
