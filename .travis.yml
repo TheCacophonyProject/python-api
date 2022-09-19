@@ -3,7 +3,6 @@ services:
 - docker
 language: python
 python:
-- '3.6'
 - '3.7'
 addons:
   apt:
@@ -14,11 +13,11 @@ env:
   - CACOPHONY_API_VER=v4.10.0
 matrix:
   include:
-  - python: 3.6
+  - python: 3.7
     env: TOX_ENV=pep257
-  - python: 3.6
+  - python: 3.7
     env: TOX_ENV=docs
-  - python: 3.6
+  - python: 3.7
     env: TOX_ENV=coverage
 before_install:
   - pip install black
@@ -51,3 +50,4 @@ deploy:
     secure: flLuzV2XG8XQI6XVg6nivk8jDltYFQd8jZugtNqIuZ4ToOLkANqQIR7hmBWFTWwJoZvC7pgMVpOXc04vaaFYL0yKBnDYesddmXES9TNyAHRMnXZ6e0ISzgjRldEVT9kNekXDHwuVCPOX2doLUwcROtiALVVY6Tfs96e7yS523EdvHPAuTQQYmAv+15vuAWhWMbVrqE0n5Ek99eBvnc42SiHT3HQF+4CQezJDhAMCujtIql/Va5BpYWUisY+sK37hQL8l7cTReExwVLUU0fR9hhRuq+D0GyjGQfin3XP2ak4GNyNzByPGDCCp7tOjn8oG5pRAOfHGssLuUf3NiTAaUyJs6QOYUZWsJYAh6OnFc90J+ey4B5ick8FxvmOmT3Hg0zOR14EfAlm8AxH5MEcWUbVrtoZ9WbAm93BKV6x1eyKeSkL33X64Pr8ax6ZZRXLTV6o7n6lY5ZsSXhpCIQgIBO26q2s8Hhiv8QyZibKMU5vN9agzKAf73qDlsYNF8rBZx6mQ6V0GGPos0bnEdWcrgEzft8WkGS7kuFxscynFjHgxZ8vNWVxagQk5PojTm1lcOra25JfXIW308yMm+BLZAtOV6TO5M9fFX1ymMFtrgC3FRVOyzUVMLT8ixO7wdtrr++QS1fVq0DjAefV5RT8mvHKZiAH3q79CIqPsqjWMoTU=
   on:
     tags: true
+  distributions: "sdist bdist_wheel"
