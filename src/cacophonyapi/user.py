@@ -130,9 +130,10 @@ class UserAPI(APIBase):
         )
 
         if not props:
-            if filename.endswith(".cptv"):
+            _, ext = os.path.splitext(filename)
+            if ext == ".cptv":
                 props = {"type": "thermalRaw"}
-            elif filename.endswith(".mp3"):
+            elif ext in [".mp3", ".m4a", ".wav"]:
                 props = {"type": "audio"}
             else:
                 raise ValueError("not sure how to handle this file type")
