@@ -4,6 +4,9 @@ from urllib.parse import urljoin
 
 
 class APIBase:
+    TIMEOUT = 10
+    DOWNLOAD_TIMEOUT = 100
+
     def __init__(self, baseurl, loginname, password, logintype):
         self._baseurl = baseurl
         self._loginname = loginname
@@ -14,12 +17,16 @@ class APIBase:
         url = urljoin(self._baseurl, "/authenticate_" + logintype)
         if logintype == "user":
             r = requests.post(
-                url, data={"email": self._loginname, "password": password}
+                url,
+                data={"email": self._loginname, "password": password},
+                timeout=self.TIMEOUT,
             )
         else:
             nameProp = logintype + "name"
             r = requests.post(
-                url, data={nameProp: self._loginname, "password": password}
+                url,
+                data={nameProp: self._loginname, "password": password},
+                timeout=self.TIMEOUT,
             )
 
         if r.status_code == 200:
