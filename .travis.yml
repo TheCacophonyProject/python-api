@@ -4,7 +4,7 @@ services:
 - docker
 language: python
 python:
-- '3.7'
+- '3.9'
 addons:
   apt:
     packages:
@@ -14,11 +14,11 @@ env:
   - CACOPHONY_API_VER=v4.10.0
 matrix:
   include:
-  - python: 3.7
+  - python: 3.9
     env: TOX_ENV=pep257
-  - python: 3.7
+  - python: 3.9
     env: TOX_ENV=docs
-  - python: 3.7
+  - python: 3.9
     env: TOX_ENV=coverage
 before_install:
   - pip install black
