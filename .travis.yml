@@ -23,7 +23,7 @@ before_install:
   - pip install black
   - ./check-style.sh
 install:
-- apt install -y openssl
+- sudo apt install -y openssl
 - pip install tox-travis
 - pip install setuptools
 - pip install twine
