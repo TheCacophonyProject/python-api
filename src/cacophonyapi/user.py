@@ -185,11 +185,11 @@ class UserAPI(APIBase):
         )
         return self._check_response(r)["rows"]
 
-    def download_file(self, file_id):
+    def download_file(self, file_id, timeout=APIBase.DOWNLOAD_TIMEOUT):
         url = urljoin(self._baseurl, "/api/v1/files/" + str(file_id))
         r = requests.get(url, headers=self._auth_header)
         d = self._check_response(r)
-        return d["file"], self._download_signed(d["jwt"])
+        return d["file"], self._download_signed(d["jwt"], timeout)
 
     def delete_file(self, file_id):
         url = urljoin(self._baseurl, "/api/v1/files/" + str(file_id))
