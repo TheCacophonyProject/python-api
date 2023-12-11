@@ -24,14 +24,22 @@ class UserAPI(APIBase):
 
     def get(self, recording_id):
         url = urljoin(self._baseurl, "/api/v1/recordings/" + str(recording_id))
-        r = requests.get(url, headers=self._auth_header)
+        r = requests.get(
+            url,
+            headers=self._auth_header,
+            timeout=APIBase.TIMEOUT,
+        )
         return check_response(r)["recording"]
 
     def get_tracks(self, recording_id):
         url = urljoin(
             self._baseurl, "/api/v1/recordings/{}/tracks".format(recording_id)
         )
-        r = requests.get(url, headers=self._auth_header)
+        r = requests.get(
+            url,
+            headers=self._auth_header,
+            timeout=APIBase.TIMEOUT,
+        )
         return check_response(r)
 
     def get_groups_as_json(self):
@@ -45,13 +53,17 @@ class UserAPI(APIBase):
             urljoin(self._baseurl, url),
             params={"where": "{}"},
             headers=self._auth_header,
+            timeout=APIBase.TIMEOUT,
         )
         return check_response(r)
 
     def reprocess(self, recordings: []):
         url = urljoin(self._baseurl, "/api/v1/reprocess")
         r = requests.post(
-            url, headers=self._auth_header, data={"recordings": recordings}
+            url,
+            headers=self._auth_header,
+            data={"recordings": recordings},
+            timeout=APIBase.TIMEOUT,
         )
         return check_response(r)
 
@@ -93,36 +105,49 @@ class UserAPI(APIBase):
             params["tagMode"] = tagmode
         if tags is not None:
             params["tags"] = json.dumps(tags)
-
-        r = requests.get(url, params=params, headers=self._auth_header)
+        r = requests.get(
+            url,
+            params=params,
+            headers=self._auth_header,
+            timeout=APIBase.TIMEOUT,
+        )
         data = check_response(r)
         if raw_json:
             return data
         else:
             return data["rows"]
 
-    def download(self, recording_id):
-        return self._download_recording(recording_id, "downloadFileJWT")
+    def download(self, recording_id, timeout=APIBase.DOWNLOAD_TIMEOUT):
+        return self._download_recording(
+            recording_id, "downloadFileJWT", timeout=timeout
+        )
 
-    def download_raw(self, recording_id):
-        return self._download_recording(recording_id, "downloadRawJWT")
+    def download_raw(self, recording_id, timeout=APIBase.DOWNLOAD_TIMEOUT):
+        return self._download_recording(recording_id, "downloadRawJWT", timeout=timeout)
 
-    def _download_recording(self, recording_id, jwt_key):
+    def _download_recording(self, recording_id, jwt_key, timeout):
         url = urljoin(self._baseurl, "/api/v1/recordings/{}".format(recording_id))
-        r = requests.get(url, headers=self._auth_header)
+        r = requests.get(
+            url,
+            headers=self._auth_header,
+            timeout=timeout,
+        )
         d = self._check_response(r)
-        return self._download_signed(d[jwt_key])
+        return self._download_signed(d[jwt_key], timeout=timeout)
 
-    def _download_signed(self, token):
+    def _download_signed(self, token, timeout):
         r = requests.get(
             urljoin(self._baseurl, "/api/v1/signedUrl"),
             params={"jwt": token},
             stream=True,
+            timeout=timeout,
         )
         r.raise_for_status()
         yield from r.iter_content(chunk_size=4096)
 
-    def upload_recording(self, groupname, devicename, filename, props=None):
+    def upload_recording(
+        self, groupname, devicename, filename, props=None, timeout=200
+    ):
         """Upload a recording on behalf of a device."""
         url = urljoin(
             self._baseurl,
@@ -130,9 +155,10 @@ class UserAPI(APIBase):
         )
 
         if not props:
-            if filename.endswith(".cptv"):
+            _, ext = os.path.splitext(filename)
+            if ext == ".cptv":
                 props = {"type": "thermalRaw"}
-            elif filename.endswith(".mp3"):
+            elif ext in [".mp3", ".m4a", ".wav"]:
                 props = {"type": "audio"}
             else:
                 raise ValueError("not sure how to handle this file type")
@@ -145,7 +171,9 @@ class UserAPI(APIBase):
                 "Content-Type": multipart_data.content_type,
                 "Authorization": self._token,
             }
-            r = requests.post(url, data=multipart_data, headers=headers)
+            r = requests.post(
+                url, data=multipart_data, headers=headers, timeout=timeout
+            )
 
         self._check_response(r)
         return r.json()
@@ -157,11 +185,11 @@ class UserAPI(APIBase):
         )
         return self._check_response(r)["rows"]
 
-    def download_file(self, file_id):
+    def download_file(self, file_id, timeout=APIBase.DOWNLOAD_TIMEOUT):
         url = urljoin(self._baseurl, "/api/v1/files/" + str(file_id))
         r = requests.get(url, headers=self._auth_header)
         d = self._check_response(r)
-        return d["file"], self._download_signed(d["jwt"])
+        return d["file"], self._download_signed(d["jwt"], timeout)
 
     def delete_file(self, file_id):
         url = urljoin(self._baseurl, "/api/v1/files/" + str(file_id))
@@ -170,6 +198,7 @@ class UserAPI(APIBase):
 
 
 def check_response(r):
+    r.raise_for_status()
     data = r.json()
     if r.status_code == 200:
         return data
