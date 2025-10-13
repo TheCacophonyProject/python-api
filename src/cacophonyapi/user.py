@@ -62,7 +62,7 @@ class UserAPI(APIBase):
         r = requests.post(
             url,
             headers=self._auth_header,
-            data={"recordings": recordings},
+            json={"recordings": recordings},
             timeout=APIBase.TIMEOUT,
         )
         return check_response(r)
