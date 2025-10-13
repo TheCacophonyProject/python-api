@@ -1,10 +1,10 @@
 sudo: required
+dist: bionic
 services:
 - docker
 language: python
 python:
-- '3.6'
-- '3.7'
+- '3.9'
 addons:
   apt:
     packages:
@@ -14,16 +14,17 @@ env:
   - CACOPHONY_API_VER=v4.10.0
 matrix:
   include:
-  - python: 3.6
+  - python: 3.9
     env: TOX_ENV=pep257
-  - python: 3.6
+  - python: 3.9
     env: TOX_ENV=docs
-  - python: 3.6
+  - python: 3.9
     env: TOX_ENV=coverage
 before_install:
   - pip install black
   - ./check-style.sh
 install:
+- sudo apt install -y openssl
 - pip install tox-travis
 - pip install setuptools
 - pip install twine

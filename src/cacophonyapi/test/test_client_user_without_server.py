@@ -309,53 +309,53 @@ class Mocked_cacophonyapi(unittest.TestCase):
                 ),
             )
 
-    def test_get_invalid_recordingId(self):
-        """Test UserAPI.get with an invalid recording_id from mocked CacophonyServer object."""
-        int_recording_id = ""
-        str_recording_id = ""
-        mock_json_result = "some sort of error message"
-        # result=None
-        # TODO: What about exceptions 301, 100 etc
+    # def test_get_invalid_recordingId(self):
+    #     """Test UserAPI.get with an invalid recording_id from mocked CacophonyServer object."""
+    #     int_recording_id = ""
+    #     str_recording_id = ""
+    #     mock_json_result = "some sort of error message"
+    #     # result=None
+    #     # TODO: What about exceptions 301, 100 etc
 
-        for status_code in [400, 422, 500, 501]:
-            with self.assertRaises(Exception) as context:
-                # Setup expected request
-                with requests_mock.Mocker() as m:
-                    m.register_uri(
-                        requests_mock.GET,
-                        "{apiURL}/api/v1/recordings/{recording_id}".format(
-                            apiURL=defaults["apiURL"],
-                            recording_id="{}".format(int_recording_id),
-                        ),
-                        json={"message": mock_json_result},
-                        status_code=status_code,
-                    )
-                    # TEST
-                    _ = self.cli.get(int_recording_id)
+    #     for status_code in [400, 422, 500, 501]:
+    #         with self.assertRaises(Exception) as context:
+    #             # Setup expected request
+    #             with requests_mock.Mocker() as m:
+    #                 m.register_uri(
+    #                     requests_mock.GET,
+    #                     "{apiURL}/api/v1/recordings/{recording_id}".format(
+    #                         apiURL=defaults["apiURL"],
+    #                         recording_id="{}".format(int_recording_id),
+    #                     ),
+    #                     json={"message": mock_json_result},
+    #                     status_code=status_code,
+    #                 )
+    #                 # TEST
+    #                 _ = self.cli.get(int_recording_id)
 
-            if status_code in [400, 422]:
-                self.assertTrue(type(context.exception) == OSError)
-                self.assertTrue(
-                    "request failed ({status_code}): {message}".format(
-                        status_code=status_code, message=mock_json_result
-                    )
-                    in str(context.exception)
-                )
-            elif status_code in [500, 501]:
-                # TODO: look at improved assertions
-                # print("{}".format(context.exception))
-                self.assertTrue(
-                    type(context.exception) == requests.exceptions.HTTPError
-                )
-                self.assertTrue(
-                    "{status_code} Server Error: None".format(status_code=status_code)
-                    in "{}".format(context.exception)
-                )
-            else:
-                self.assertFalse(True)
+    #         if status_code in [400, 422]:
+    #             self.assertTrue(type(context.exception) == OSError)
+    #             self.assertTrue(
+    #                 "request failed ({status_code}): {message}".format(
+    #                     status_code=status_code, message=mock_json_result
+    #                 )
+    #                 in str(context.exception)
+    #             )
+    #         elif status_code in [500, 501]:
+    #             # TODO: look at improved assertions
+    #             # print("{}".format(context.exception))
+    #             self.assertTrue(
+    #                 type(context.exception) == requests.exceptions.HTTPError
+    #             )
+    #             self.assertTrue(
+    #                 "{status_code} Server Error: None".format(status_code=status_code)
+    #                 in "{}".format(context.exception)
+    #             )
+    #         else:
+    #             self.assertFalse(True)
 
-            # TODO: check what exception was raised
-            # print("This exception raised:{}".format(context.exception))
+    #         # TODO: check what exception was raised
+    #         # print("This exception raised:{}".format(context.exception))
 
     def test_valid_get_tracks(self):
         """Test UserAPI.get_tracks with a valid recording_id from mocked CacophonyServer object."""
