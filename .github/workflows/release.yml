@@ -1,5 +1,5 @@
-name: Classifier Release
-run-name: Build classifier
+name: Python API Release
+run-name: Build Python API
 on: [push]
 jobs:
   pypi-build:
